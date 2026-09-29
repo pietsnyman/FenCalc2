@@ -58,7 +58,7 @@ jobs:
 
           ls -lh dist
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: FenCalc2-${{ github.ref_name }}
           path: dist/*
