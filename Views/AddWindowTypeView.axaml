@@ -1,0 +1,46 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:FenCalc2.ViewModels"
+        x:Class="FenCalc2.Views.AddWindowTypeView"
+        x:DataType="vm:AddWindowTypeViewModel"
+        Title="Add Window Type"
+        Width="595" Height="360"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+    <DockPanel Margin="16">
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,12,0,0">
+            <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource DangerBrush}" FontSize="11" VerticalAlignment="Center" />
+            <Button Content="OK" Command="{Binding OkCommand}" Width="80" Padding="6,4" />
+            <Button Content="Cancel" Command="{Binding CancelCommand}" Click="OnCancelClick" Width="80" Padding="6,4" />
+        </StackPanel>
+        <StackPanel Spacing="8">
+            <!-- One grid: fixed label cols so the total width is deterministic (562) —
+                 Range/TypeName span everything (right edge aligns with Frame/Height/SHGC);
+                 field columns are the 200px standard. Explicit Widths because ComboBox
+                 does not stretch. -->
+            <Grid ColumnDefinitions="72,200,16,74,200" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+                <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" Text="Range:" FontSize="12" Margin="0,0,0,4" />
+                <ComboBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" ItemsSource="{Binding Ranges}" SelectedItem="{Binding SelectedRange}" Width="562" FontSize="12" Margin="0,0,0,8" />
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="5" Text="Type Name:" FontSize="12" Margin="0,0,0,4" />
+                <TextBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="5" Text="{Binding TypeName}" FontSize="12" Margin="0,0,0,8" />
+
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="Glass:" VerticalAlignment="Center" FontSize="12" Margin="0,0,6,6" />
+                <ComboBox Grid.Row="4" Grid.Column="1" ItemsSource="{Binding GlassTypes}" SelectedItem="{Binding SelectedGlass}" Width="200" FontSize="12" Margin="0,0,0,6" />
+                <TextBlock Grid.Row="4" Grid.Column="3" Text="Frame:" VerticalAlignment="Center" FontSize="12" Margin="0,0,6,6" />
+                <ComboBox Grid.Row="4" Grid.Column="4" ItemsSource="{Binding FrameTypes}" SelectedItem="{Binding SelectedFrame}" Width="200" FontSize="12" Margin="0,0,0,6" />
+
+                <TextBlock Grid.Row="5" Grid.Column="0" Text="Width (m):" VerticalAlignment="Center" FontSize="12" Margin="0,0,6,6" />
+                <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding Width}" FontSize="12" Margin="0,0,0,6" />
+                <TextBlock Grid.Row="5" Grid.Column="3" Text="Height (m):" VerticalAlignment="Center" FontSize="12" Margin="0,0,6,6" />
+                <TextBox Grid.Row="5" Grid.Column="4" Text="{Binding Height}" FontSize="12" Margin="0,0,0,6" />
+
+                <TextBlock Grid.Row="6" Grid.Column="0" Text="U-Value:" VerticalAlignment="Center" FontSize="12" Margin="0,0,6,0" />
+                <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding UValueText}" FontSize="12" />
+                <TextBlock Grid.Row="6" Grid.Column="3" Text="SHGC:" VerticalAlignment="Center" FontSize="12" Margin="0,0,6,0" />
+                <TextBox Grid.Row="6" Grid.Column="4" Text="{Binding ShgcText}" FontSize="12" />
+            </Grid>
+            <TextBlock Text="U-Value / SHGC: leave blank to use the catalogue defaults; enter values only for manufacturer-tested windows." FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" />
+        </StackPanel>
+    </DockPanel>
+</Window>

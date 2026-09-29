@@ -1,0 +1,43 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:FenCalc2.ViewModels"
+        x:Class="FenCalc2.Views.DeleteFloorView"
+        x:DataType="vm:DeleteFloorViewModel"
+        Title="Delete Floor"
+        Width="232" Height="250"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+
+    <DockPanel Margin="16">
+        <StackPanel DockPanel.Dock="Bottom" Spacing="6" Margin="0,12,0,0">
+            <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource DangerBrush}" FontSize="11" TextWrapping="Wrap" HorizontalAlignment="Left" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" IsVisible="{Binding !ConfirmMode}">
+                <Button Content="Delete" Command="{Binding DeleteCommand}" Width="80" Padding="6,4" />
+                <Button Content="Cancel" Command="{Binding CancelCommand}" Click="OnCancelClick" Width="80" Padding="6,4" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" IsVisible="{Binding ConfirmMode}">
+                <Button Content="Back" Command="{Binding BackCommand}" Width="80" Padding="6,4" />
+                <Button Content="Yes, delete" Command="{Binding ConfirmDeleteCommand}" Classes="quiet"
+                        Foreground="{DynamicResource DangerBrush}" BorderBrush="{DynamicResource DangerBrush}" BorderThickness="1"
+                        Width="90" Padding="6,4" FontWeight="SemiBold" />
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Phase 1: pick the floor -->
+        <StackPanel Spacing="8" IsVisible="{Binding !ConfirmMode}">
+            <StackPanel Spacing="4">
+                <TextBlock Text="Floor to delete:" FontSize="12" />
+                <ComboBox ItemsSource="{Binding FloorNames}" SelectedItem="{Binding SelectedFloor}" Width="200" FontSize="12" />
+            </StackPanel>
+            <TextBlock Text="The floor's windows and plan image are removed too. This cannot be undone."
+                       FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"
+                       TextWrapping="Wrap" />
+        </StackPanel>
+
+        <!-- Phase 2: confirm -->
+        <StackPanel Spacing="8" IsVisible="{Binding ConfirmMode}">
+            <TextBlock Text="{Binding ConfirmText}" FontSize="12" FontWeight="SemiBold" TextWrapping="Wrap" HorizontalAlignment="Left" />
+            <TextBlock Text="The floor's windows and floor-plan image are permanently removed." FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" />
+        </StackPanel>
+    </DockPanel>
+</Window>

@@ -1,0 +1,134 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:FenCalc2.ViewModels"
+        x:Class="FenCalc2.Views.GettingStartedView"
+        x:DataType="vm:GettingStartedViewModel"
+        Title="Getting Started — FenCalc2"
+        Icon="avares://FenCalc2/Assets/FenCalc2.ico"
+        Width="720" Height="780"
+        CanResize="True"
+        WindowStartupLocation="CenterOwner">
+
+    <Window.Styles>
+        <Style Selector="TextBlock.h2">
+            <Setter Property="FontSize" Value="13.5" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="Margin" Value="0,10,0,0" />
+        </Style>
+        <Style Selector="TextBlock.body">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Margin" Value="0,2,0,2" />
+        </Style>
+        <Style Selector="TextBlock.step">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Margin" Value="18,1,0,1" />
+        </Style>
+    </Window.Styles>
+
+    <DockPanel Margin="16">
+        <StackPanel DockPanel.Dock="Bottom"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="0,12,0,0">
+            <Button Content="Close" Command="{Binding CloseCommand}" Width="80" Padding="6,4" IsDefault="True" />
+        </StackPanel>
+
+        <ScrollViewer>
+            <StackPanel Spacing="2">
+
+                <!-- ===================== Overview ===================== -->
+                <TextBlock Classes="h2" Text="What this application does" Margin="0,0,0,2" />
+                <TextBlock Classes="body"
+                           Text="FenCalc2 calculates the fenestration (window) figures you need for a SANS 10400-XA thermal-compliance calculation: glazing areas per window type, the window-to-floor-area ratio, U-values and solar heat gain for each orientation of the building, and conductance totals. The result is a plain-text report you can paste into your own documents." />
+                <TextBlock Classes="body"
+                           Text="It is aimed at architectural professionals, building-energy consultants and students who already work with SANS 10400-XA. You are expected to understand the standard itself — including what a U-value, SHGC (g-value), window-to-floor-area ratio, climate zone and the P and G values in the shading expression mean. This application performs the arithmetic; it does not teach the standard. If any of those terms are unfamiliar, read SANS 10400-XA: The design of buildings for thermal comfort (SANS 10400-XA, published by SABS) before relying on the output." />
+
+                <Border Background="{DynamicResource SunkenBrush}"
+                        BorderBrush="{DynamicResource WarningBrush}"
+                        BorderThickness="1" CornerRadius="4" Padding="10" Margin="0,8,0,0">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Verify everything — no liability"
+                                   FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource WarningBrush}" />
+                        <TextBlock Classes="body"
+                                   Text="All results are only as good as the data you enter. Check every value — glazing and frame properties, dimensions, P and G values, climate zone and orientation — against SANS 10400-XA and the window manufacturer's tested data before using the output for anything that matters. The author accepts no liability for any decision, loss or damage arising from the use of this application, and the software is provided as-is under the MIT licence."
+                                   Margin="0" />
+                    </StackPanel>
+                </Border>
+
+                <!-- ===================== 1. Catalogue ===================== -->
+                <TextBlock Classes="h2" Text="1. Your window catalogue" />
+                <TextBlock Classes="body"
+                           Text="Windows are organised into ranges, and each range holds window types. A fresh installation already contains a starter catalogue: seven glazing types, five frame materials, the SANS 10400-XA climate-zone tables, and five ranges (Aluminium Sliding Doors, Aluminium Top Hung, Folding Doors, Side Hung Steel, Top Hung Steel) with their window types." />
+                <TextBlock Classes="step" Text="•  Upgrading from the classic FenCalc? Use Catalogue &#8250; Import Old Database to bring in your own ranges, window types, projects and floor-plan images (available on Windows only)." />
+                <TextBlock Classes="step" Text="•  Manage the catalogue from the Catalogue menu: Add Window Range, Add Window Type, and the matching Delete entries." />
+
+                <!-- ===================== 2. Worked example ===================== -->
+                <TextBlock Classes="h2" Text="2. Example: create a top-hung aluminium range" />
+                <TextBlock Classes="step" Text="1.  Catalogue &#8250; Add Window Range, type a name such as Aluminium Top Hung, OK. A range is only a grouping name — use it for a manufacturer, series or opener type." />
+                <TextBlock Classes="step" Text="2.  Catalogue &#8250; Add Window Type. Choose the range, then give the type a name, for example PTT1212." />
+                <TextBlock Classes="step" Text="3.  Pick the Glass (for example Single Clear) and the Frame (Aluminium). Frame matters: Steel and Aluminium use the steel/aluminium U-value and SHGC columns of the glazing table; every other frame material uses the standard columns." />
+                <TextBlock Classes="step" Text="4.  Enter the default size — Width (m) 0.900 and Height (m) 2.100 are the starting values." />
+                <TextBlock Classes="step" Text="5.  Leave U-Value and SHGC blank to use the catalogue defaults, or enter values only for manufacturer-tested windows." />
+                <TextBlock Classes="step" Text="6.  OK. Repeat for each size in the series (PTT912, PTT915, PTT1215 …), or use the ranges that already ship with the application." />
+
+                <!-- ===================== 3. Project ===================== -->
+                <TextBlock Classes="h2" Text="3. Create a new project" />
+                <TextBlock Classes="step" Text="1.  Project &#8250; New Project." />
+                <TextBlock Classes="step" Text="2.  Fill in Client Name, Project Name and Building Name (the client box suggests names you have used before)." />
+                <TextBlock Classes="step" Text="3.  Choose the Climate Zone — the SANS 10400-XA zone 1 to 6 for the site. It sets the solar constants used throughout the calculation." />
+                <TextBlock Classes="step" Text="4.  Choose the Orientation: the true compass direction shown at the top of your plan. You can change it at any time." />
+                <TextBlock Classes="step" Text="5.  OK creates the building with a Ground Floor ready to use. Project &#8250; Open Project re-opens an existing building; New From Existing copies one under new names." />
+
+                <!-- ===================== 4. Plan image ===================== -->
+                <TextBlock Classes="h2" Text="4. Add a floor-plan image" />
+                <TextBlock Classes="body"
+                           Text="The centre box of the compass shows the plan drawing. Click it to open the Select floor plan image dialog and choose a png, jpg, jpeg or bmp — a screenshot of your drawing works perfectly." />
+                <TextBlock Classes="step" Text="•  The application copies the file into its own data folder; your original file is never moved or changed." />
+                <TextBlock Classes="step" Text="•  There is one image per floor. Each floor gets its own plan when you switch to it." />
+                <TextBlock Classes="step" Text="•  The image flips left-to-right when the building is mirrored (see below), and turns with the compass." />
+
+                <!-- ===================== 5. Orient the building ===================== -->
+                <TextBlock Classes="h2" Text="5. Line up the building: rotate and mirror" />
+                <TextBlock Classes="step" Text="•  Orientation (left panel) is the absolute direction at the top of the plan. Setting it re-anchors the whole compass." />
+                <TextBlock Classes="step" Text="•  Rotate Clockwise and Rotate Anticlockwise (under the compass) shift the direction ring one step at a time. Rolling the mouse wheel over the compass does the same. Windows stay pinned to their spot on the drawing — only the direction labels move." />
+                <TextBlock Classes="step" Text="•  Mirror Building flips the plan left-to-right: window directions are swapped accordingly and the image mirrors. Click it again to swap back. Use it when your drawing is a mirrored version of the real building." />
+                <TextBlock Classes="step" Text="•  Whichever direction labels the tiles show are the true directions used in the calculation." />
+
+                <!-- ===================== 6. Add windows ===================== -->
+                <TextBlock Classes="h2" Text="6. Add windows to the building" />
+                <TextBlock Classes="step" Text="•  Tap an empty compass tile (the eight tiles around the plan are the eight directions), or right-click a tile and choose Add Window Here, or use the Add Window… button." />
+                <TextBlock Classes="step" Text="•  In the Add Window dialog pick the Floor, the Orientation (pre-filled with the side you clicked), the Range and Type, then the Glass, Frame, Width (m) and Height (m), the P (mm) and G (mm) shading dimensions, and optionally a Room Name. U-Value and SHGC fill in automatically from the catalogue and stay editable." />
+                <TextBlock Classes="step" Text="•  OK adds the window — it appears as a card in that tile, and the compass switches to the floor you chose." />
+
+                <!-- ===================== 7. Edit windows ===================== -->
+                <TextBlock Classes="h2" Text="7. Change a window afterwards" />
+                <TextBlock Classes="step" Text="•  Click a window card in a tile: the Selected Window panel on the right fills with its details. Nothing is saved until you press Apply Changes." />
+                <TextBlock Classes="step" Text="•  Swap it to a different window: change Range or Type (and Glass, Frame, sizes, P, G, U-Value, SHGC as needed), then Apply Changes. Editing Width or Height creates a new Custom type, so the shared catalogue entry stays untouched." />
+                <TextBlock Classes="step" Text="•  Move it to another side of the building: set Orient to the new direction and Apply Changes." />
+                <TextBlock Classes="step" Text="•  Move it to another floor: set Floor and Apply Changes — the compass follows it there." />
+                <TextBlock Classes="step" Text="•  Copy to… makes copies on any combination of floors and directions (handy for identical floors). Remove deletes the window immediately — there is no undo." />
+
+                <!-- ===================== 8. Multi-storey ===================== -->
+                <TextBlock Classes="h2" Text="8. Multi-storey buildings" />
+                <TextBlock Classes="step" Text="•  Click the + next to Floor to add the next free floor (Ground Floor, First Floor, …). The floor area and plan image are inherited from the floor below — check the Floor Area (m²) box and correct it if the floor differs." />
+                <TextBlock Classes="step" Text="•  The Floor list switches the active floor: its windows fill the compass, its plan image appears in the centre, and its area drives the calculation for that floor." />
+                <TextBlock Classes="step" Text="•  Project &#8250; Duplicate Floor copies a floor including its windows (use it for typical floors), Rename Floor renames it, and Delete Floor removes it after a two-step confirmation. The last remaining floor cannot be deleted." />
+                <TextBlock Classes="step" Text="•  The Output always covers every floor of the building — switching floors only changes what the compass shows." />
+
+                <!-- ===================== 9. Output ===================== -->
+                <TextBlock Classes="h2" Text="9. The output is the result" />
+                <TextBlock Classes="body"
+                           Text="The Output panel is the useful bit: per floor it lists the fenestration area of every window type, totals, the window-to-floor-area ratio, the constants, the solar heat gain for each direction, and the conductance totals." />
+                <TextBlock Classes="step" Text="•  Press Copy to Clipboard, then paste into your document." />
+                <TextBlock Classes="step" Text="•  Paste it as plain text in a monospace font — Consolas or Courier New — so the columns line up. In a proportional font the spacing will not align." />
+                <TextBlock Classes="step" Text="•  2 dec / 3 dec set the decimal places (calculations always use 3), Capitalize upper-cases the labels, and Combine floors calculates all floors as one building instead of one block per floor." />
+                <TextBlock Classes="step" Text="•  Read the disclaimer at the top again before you rely on any number: verify against SANS 10400-XA." />
+
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
+</Window>

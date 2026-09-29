@@ -1,0 +1,28 @@
+# ---- Build output -------------------------------------------------------------
+bin/
+obj/
+publish/
+out/
+
+# ---- Visual Studio / IDE ------------------------------------------------------
+.vs/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# ---- Local databases (the app DB lives in %LOCALAPPDATA%; never commit one) ---
+*.db
+*.db-*
+*.db.*
+
+# ---- Development-only notes (kept on this machine, not published) -------------
+AGENTS.md
+docs/PROGRESS.md
+docs/plans/
+
+# ---- Misc ---------------------------------------------------------------------
+*.log
+.DS_Store
+Thumbs.db

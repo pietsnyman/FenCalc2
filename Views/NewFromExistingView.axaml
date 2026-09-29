@@ -1,0 +1,56 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:FenCalc2.ViewModels"
+        x:Class="FenCalc2.Views.NewFromExistingView"
+        x:DataType="vm:NewFromExistingViewModel"
+        Title="New From Existing"
+        Width="232" Height="510"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+
+    <DockPanel Margin="16">
+        <StackPanel DockPanel.Dock="Bottom" Spacing="6" Margin="0,12,0,0">
+            <TextBlock Text="{Binding ErrorMessage}" Foreground="{StaticResource DangerBrush}" FontSize="11" TextWrapping="Wrap" HorizontalAlignment="Left" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                <Button Content="OK" Command="{Binding OkCommand}" Width="80" Padding="6,4" />
+                <Button Content="Cancel" Command="{Binding CancelCommand}" Click="OnCancelClick" Width="80" Padding="6,4" />
+            </StackPanel>
+        </StackPanel>
+
+        <StackPanel Spacing="8">
+            <TextBlock Text="Source building:" FontWeight="SemiBold" FontSize="12" />
+            <StackPanel Spacing="4">
+                <TextBlock Text="Client:" FontSize="12" />
+                <ComboBox ItemsSource="{Binding SourceClients}" SelectedItem="{Binding SourceClient}" Width="200" FontSize="12" />
+            </StackPanel>
+            <StackPanel Spacing="4">
+                <TextBlock Text="Project:" FontSize="12" />
+                <ComboBox ItemsSource="{Binding SourceProjects}" SelectedItem="{Binding SourceProject}" Width="200" FontSize="12" />
+            </StackPanel>
+            <StackPanel Spacing="4">
+                <TextBlock Text="Building:" FontSize="12" />
+                <ComboBox ItemsSource="{Binding SourceBuildings}" SelectedItem="{Binding SourceBuilding}" Width="200" FontSize="12" />
+            </StackPanel>
+
+            <Separator />
+            <TextBlock Text="New building:" FontWeight="SemiBold" FontSize="12" />
+            <StackPanel Spacing="4">
+                <TextBlock Text="Client:" FontSize="12" />
+                <!-- Editable dropdown: existing clients suggested, new names typeable -->
+                <AutoCompleteBox x:Name="DestClientBox" Text="{Binding DestClient, Mode=OneWay}"
+                                 ItemsSource="{Binding DestClients}" TextChanged="OnDestClientTextChanged"
+                                 MaxDropDownHeight="200" Width="200" FontSize="12" />
+            </StackPanel>
+            <StackPanel Spacing="4">
+                <TextBlock Text="Project:" FontSize="12" />
+                <AutoCompleteBox x:Name="DestProjectBox" Text="{Binding DestProject, Mode=OneWay}"
+                                 ItemsSource="{Binding DestProjects}" TextChanged="OnDestProjectTextChanged"
+                                 MaxDropDownHeight="200" Width="200" FontSize="12" />
+            </StackPanel>
+            <StackPanel Spacing="4">
+                <TextBlock Text="Building (new name):" FontSize="12" />
+                <TextBox Text="{Binding DestBuilding}" Width="200" FontSize="12" />
+            </StackPanel>
+        </StackPanel>
+    </DockPanel>
+</Window>

@@ -1,0 +1,20 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:FenCalc2.ViewModels"
+        x:Class="FenCalc2.Views.DeleteRangeView"
+        x:DataType="vm:DeleteRangeViewModel"
+        Title="Delete Window Range"
+        Width="232" Height="150"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+    <DockPanel Margin="16">
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,12,0,0">
+            <Button Content="Delete" Command="{Binding OkCommand}" Width="80" Padding="6,4" />
+            <Button Content="Cancel" Command="{Binding CancelCommand}" Click="OnCancelClick" Width="80" Padding="6,4" />
+        </StackPanel>
+        <StackPanel Spacing="4">
+            <TextBlock Text="Select Range to Delete:" FontSize="12" />
+            <ComboBox ItemsSource="{Binding Ranges}" SelectedItem="{Binding SelectedRange}" Width="200" FontSize="12" />
+        </StackPanel>
+    </DockPanel>
+</Window>

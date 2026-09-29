@@ -1,0 +1,215 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="FenCalc2.App"
+             xmlns:local="using:FenCalc2"
+             RequestedThemeVariant="Default">
+             <!-- Theme is switched at runtime via View > Theme (Light / Dark / System
+                  plus the Olive / Burnt Orange / Mulberry color themes — custom
+                  variants with Light as base, see AppThemes.cs) and persisted in
+                  AppSettings["Theme"]; App.axaml.cs applies it before MainWindow opens.
+                  "Default" follows the OS until a choice is saved. Palette brushes live
+                  in ThemeDictionaries — views must reference them with DynamicResource
+                  or they will not update when the theme changes. -->
+
+    <Application.DataTemplates>
+        <local:ViewLocator />
+    </Application.DataTemplates>
+
+    <!-- Central palette: understated-modern tokens. Views reference these instead of raw hex. -->
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <!-- Neutral surfaces -->
+                    <SolidColorBrush x:Key="SurfaceBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="PanelBrush" Color="#FCFCFD" />
+                    <SolidColorBrush x:Key="SunkenBrush" Color="#F7F8FA" />
+                    <SolidColorBrush x:Key="HairlineBrush" Color="#E5E7EB" />
+                    <!-- Text -->
+                    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#111827" />
+                    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#6B7280" />
+                    <!-- Accent: desaturated blue — primary action, focus, selection -->
+                    <SolidColorBrush x:Key="AccentBrush" Color="#3D6DA8" />
+                    <SolidColorBrush x:Key="AccentHoverBrush" Color="#35608F" />
+                    <SolidColorBrush x:Key="AccentPressedBrush" Color="#2C5179" />
+                    <SolidColorBrush x:Key="AccentSoftBrush" Color="#E8F0F9" />
+                    <SolidColorBrush x:Key="AccentTintBrush" Color="#EAF2FB" />
+                    <!-- Foreground on top of AccentBrush (filled primary buttons) -->
+                    <SolidColorBrush x:Key="AccentForegroundBrush" Color="#FFFFFF" />
+                    <!-- Semantic -->
+                    <SolidColorBrush x:Key="DangerBrush" Color="#B42318" />
+                    <SolidColorBrush x:Key="DangerTintBrush" Color="#FDF2F1" />
+                    <SolidColorBrush x:Key="SuccessBrush" Color="#15803D" />
+                    <SolidColorBrush x:Key="WarningBrush" Color="#B45309" />
+                    <!-- Compass tiles: the tile currently true-North gets the stronger blue -->
+                    <SolidColorBrush x:Key="CompassNorthBrush" Color="#BBDEFB" />
+                    <SolidColorBrush x:Key="CompassTileBrush" Color="#E3F2FD" />
+                </ResourceDictionary>
+                <!-- Light-based color themes: full token copies with a DARKENED accent
+                     family, slightly deeper Panel/Sunken tints and theme-harmonized
+                     compass tiles (the North tile stays a distinctly darker shade of
+                     the tile color). Semantic colors stay as Light. docs/themes.md -->
+                <ResourceDictionary x:Key="{x:Static local:AppThemes.Olive}">
+                    <SolidColorBrush x:Key="SurfaceBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="PanelBrush" Color="#F5F6EF" />
+                    <SolidColorBrush x:Key="SunkenBrush" Color="#EBEDE4" />
+                    <SolidColorBrush x:Key="HairlineBrush" Color="#E5E7EB" />
+                    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#111827" />
+                    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#6B7280" />
+                    <SolidColorBrush x:Key="AccentBrush" Color="#5C644C" />
+                    <SolidColorBrush x:Key="AccentHoverBrush" Color="#4F5642" />
+                    <SolidColorBrush x:Key="AccentPressedBrush" Color="#424837" />
+                    <SolidColorBrush x:Key="AccentSoftBrush" Color="#E8EBE0" />
+                    <SolidColorBrush x:Key="AccentTintBrush" Color="#EFF0E8" />
+                    <SolidColorBrush x:Key="AccentForegroundBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="DangerBrush" Color="#B42318" />
+                    <SolidColorBrush x:Key="DangerTintBrush" Color="#FDF2F1" />
+                    <SolidColorBrush x:Key="SuccessBrush" Color="#15803D" />
+                    <SolidColorBrush x:Key="WarningBrush" Color="#B45309" />
+                    <SolidColorBrush x:Key="CompassTileBrush" Color="#EEF0E7" />
+                    <SolidColorBrush x:Key="CompassNorthBrush" Color="#CCD1BC" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="{x:Static local:AppThemes.BurntOrange}">
+                    <SolidColorBrush x:Key="SurfaceBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="PanelBrush" Color="#F8F3E7" />
+                    <SolidColorBrush x:Key="SunkenBrush" Color="#F1E9D9" />
+                    <SolidColorBrush x:Key="HairlineBrush" Color="#E5E7EB" />
+                    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#111827" />
+                    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#6B7280" />
+                    <SolidColorBrush x:Key="AccentBrush" Color="#7E5A1C" />
+                    <SolidColorBrush x:Key="AccentHoverBrush" Color="#6C4D17" />
+                    <SolidColorBrush x:Key="AccentPressedBrush" Color="#5C4113" />
+                    <SolidColorBrush x:Key="AccentSoftBrush" Color="#F2E8D4" />
+                    <SolidColorBrush x:Key="AccentTintBrush" Color="#F8F0E1" />
+                    <SolidColorBrush x:Key="AccentForegroundBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="DangerBrush" Color="#B42318" />
+                    <SolidColorBrush x:Key="DangerTintBrush" Color="#FDF2F1" />
+                    <SolidColorBrush x:Key="SuccessBrush" Color="#15803D" />
+                    <SolidColorBrush x:Key="WarningBrush" Color="#B45309" />
+                    <SolidColorBrush x:Key="CompassTileBrush" Color="#F7F0E1" />
+                    <SolidColorBrush x:Key="CompassNorthBrush" Color="#E4CB9D" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="{x:Static local:AppThemes.Mulberry}">
+                    <SolidColorBrush x:Key="SurfaceBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="PanelBrush" Color="#F7F4FB" />
+                    <SolidColorBrush x:Key="SunkenBrush" Color="#EFEAF4" />
+                    <SolidColorBrush x:Key="HairlineBrush" Color="#E5E7EB" />
+                    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#111827" />
+                    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#6B7280" />
+                    <SolidColorBrush x:Key="AccentBrush" Color="#6C4F89" />
+                    <SolidColorBrush x:Key="AccentHoverBrush" Color="#5C4275" />
+                    <SolidColorBrush x:Key="AccentPressedBrush" Color="#4E3864" />
+                    <SolidColorBrush x:Key="AccentSoftBrush" Color="#E8E0EF" />
+                    <SolidColorBrush x:Key="AccentTintBrush" Color="#F0EAF5" />
+                    <SolidColorBrush x:Key="AccentForegroundBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="DangerBrush" Color="#B42318" />
+                    <SolidColorBrush x:Key="DangerTintBrush" Color="#FDF2F1" />
+                    <SolidColorBrush x:Key="SuccessBrush" Color="#15803D" />
+                    <SolidColorBrush x:Key="WarningBrush" Color="#B45309" />
+                    <SolidColorBrush x:Key="CompassTileBrush" Color="#F1ECF6" />
+                    <SolidColorBrush x:Key="CompassNorthBrush" Color="#CBB8DF" />
+                </ResourceDictionary>
+                <!-- Sage: user-specified RGB — panels F5F7F4 (all four), output/status
+                     sunken E2E6DF, tiles C1C9BA, North 8E9485; muted sage accent with
+                     white button text (≈6:1). Surface = the panel color so the four
+                     main panels take it; the image well also binds PanelBrush. -->
+                <ResourceDictionary x:Key="{x:Static local:AppThemes.Sage}">
+                    <SolidColorBrush x:Key="SurfaceBrush" Color="#F5F7F4" />
+                    <SolidColorBrush x:Key="PanelBrush" Color="#F5F7F4" />
+                    <SolidColorBrush x:Key="SunkenBrush" Color="#E2E6DF" />
+                    <SolidColorBrush x:Key="HairlineBrush" Color="#DCE1D8" />
+                    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#111827" />
+                    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#6B7280" />
+                    <SolidColorBrush x:Key="AccentBrush" Color="#5C6553" />
+                    <SolidColorBrush x:Key="AccentHoverBrush" Color="#4F5747" />
+                    <SolidColorBrush x:Key="AccentPressedBrush" Color="#434A3C" />
+                    <SolidColorBrush x:Key="AccentSoftBrush" Color="#E7EAE3" />
+                    <SolidColorBrush x:Key="AccentTintBrush" Color="#EFF1EC" />
+                    <SolidColorBrush x:Key="AccentForegroundBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="DangerBrush" Color="#B42318" />
+                    <SolidColorBrush x:Key="DangerTintBrush" Color="#FDF2F1" />
+                    <SolidColorBrush x:Key="SuccessBrush" Color="#15803D" />
+                    <SolidColorBrush x:Key="WarningBrush" Color="#B45309" />
+                    <SolidColorBrush x:Key="CompassTileBrush" Color="#C1C9BA" />
+                    <SolidColorBrush x:Key="CompassNorthBrush" Color="#8E9485" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <!-- Neutral surfaces: deep blue-charcoal (HMI-dashboard flavour) -->
+                    <SolidColorBrush x:Key="SurfaceBrush" Color="#1A2230" />
+                    <SolidColorBrush x:Key="PanelBrush" Color="#151C28" />
+                    <SolidColorBrush x:Key="SunkenBrush" Color="#10161F" />
+                    <SolidColorBrush x:Key="HairlineBrush" Color="#2A3546" />
+                    <!-- Text -->
+                    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#E5EAF2" />
+                    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#8B98AB" />
+                    <!-- Accent: same blue, brightened for dark surfaces -->
+                    <SolidColorBrush x:Key="AccentBrush" Color="#6E9BEF" />
+                    <SolidColorBrush x:Key="AccentHoverBrush" Color="#87AEF3" />
+                    <SolidColorBrush x:Key="AccentPressedBrush" Color="#5484D8" />
+                    <SolidColorBrush x:Key="AccentSoftBrush" Color="#1E3355" />
+                    <SolidColorBrush x:Key="AccentTintBrush" Color="#182844" />
+                    <!-- Dark text reads far better than white on the bright accent -->
+                    <SolidColorBrush x:Key="AccentForegroundBrush" Color="#10161F" />
+                    <!-- Semantic -->
+                    <SolidColorBrush x:Key="DangerBrush" Color="#E5614F" />
+                    <SolidColorBrush x:Key="DangerTintBrush" Color="#3A1F1C" />
+                    <SolidColorBrush x:Key="SuccessBrush" Color="#3FB27F" />
+                    <SolidColorBrush x:Key="WarningBrush" Color="#D99A4E" />
+                    <!-- Compass tiles -->
+                    <SolidColorBrush x:Key="CompassNorthBrush" Color="#2F4F7E" />
+                    <SolidColorBrush x:Key="CompassTileBrush" Color="#1D2939" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+
+    <Application.Styles>
+        <FluentTheme />
+
+        <!-- Inter everywhere (registered via WithInterFont in Program.cs) + calm text color -->
+        <Style Selector="Window">
+            <Setter Property="FontFamily" Value="Inter" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        </Style>
+
+        <!-- Soft consistent radii -->
+        <Style Selector="TextBox">
+            <Setter Property="CornerRadius" Value="6" />
+        </Style>
+        <Style Selector="AutoCompleteBox">
+            <Setter Property="CornerRadius" Value="6" />
+        </Style>
+        <Style Selector="ComboBox">
+            <Setter Property="CornerRadius" Value="6" />
+        </Style>
+        <Style Selector="Button">
+            <Setter Property="CornerRadius" Value="6" />
+        </Style>
+
+        <!-- The one filled element: primary action -->
+        <Style Selector="Button.primary">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource AccentForegroundBrush}" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <Style Selector="Button.primary:pointerover">
+            <Setter Property="Background" Value="{DynamicResource AccentHoverBrush}" />
+        </Style>
+        <Style Selector="Button.primary:pressed">
+            <Setter Property="Background" Value="{DynamicResource AccentPressedBrush}" />
+        </Style>
+
+        <!-- Quiet destructive action: hairline at rest, danger tint on hover -->
+        <Style Selector="Button.quiet">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource HairlineBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+        <Style Selector="Button.quiet:pointerover">
+            <Setter Property="Background" Value="{DynamicResource DangerTintBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource DangerBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource DangerBrush}" />
+        </Style>
+    </Application.Styles>
+</Application>

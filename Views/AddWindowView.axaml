@@ -1,0 +1,60 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:FenCalc2.ViewModels"
+        x:Class="FenCalc2.Views.AddWindowView"
+        x:DataType="vm:AddWindowViewModel"
+        Title="Add Window"
+        Width="500" Height="440"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+
+    <DockPanel Margin="16">
+        <!-- OK/Cancel buttons -->
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,12,0,0">
+            <Button Content="OK" Command="{Binding OkCommand}" Width="80" Padding="6,4" />
+            <Button Content="Cancel" Command="{Binding CancelCommand}" Click="OnCancelClick" Width="80" Padding="6,4" />
+        </StackPanel>
+
+        <!-- Form: label column fixed so all controls start on the same left edge;
+             Height and G share a second column, left-aligned with each other. -->
+        <ScrollViewer>
+            <Grid ColumnDefinitions="100,150,24,90,90" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Floor:" VerticalAlignment="Center" Margin="0,0,0,6" FontSize="12" />
+                <ComboBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="4" ItemsSource="{Binding FloorNames}" SelectedItem="{Binding SelectedFloor}" ToolTip.Tip="Floor the new window is added to — defaults to the floor shown on the compass" Width="150" HorizontalAlignment="Left" Margin="0,0,0,6" FontSize="12" />
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Orientation:" VerticalAlignment="Center" Margin="0,0,0,6" FontSize="12" />
+                <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Orientations}" SelectedItem="{Binding SelectedOrientation}" Width="150" Margin="0,0,0,6" FontSize="12" />
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Range:" VerticalAlignment="Center" Margin="0,0,0,6" FontSize="12" />
+                <ComboBox Grid.Row="2" Grid.Column="1" ItemsSource="{Binding RangeNames}" SelectedItem="{Binding SelectedRange}" Width="150" Margin="0,0,0,6" FontSize="12" />
+
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="Type:" VerticalAlignment="Center" Margin="0,0,0,6" FontSize="12" />
+                <ComboBox Grid.Row="3" Grid.Column="1" ItemsSource="{Binding WinTypes}" SelectedItem="{Binding SelectedWinType}" Width="150" Margin="0,0,0,6" FontSize="12" />
+
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="Glass:" VerticalAlignment="Center" Margin="0,0,0,6" FontSize="12" />
+                <ComboBox Grid.Row="4" Grid.Column="1" ItemsSource="{Binding GlassTypes}" SelectedItem="{Binding SelectedGlass}" Width="150" Margin="0,0,0,6" FontSize="12" />
+
+                <TextBlock Grid.Row="5" Grid.Column="0" Text="Frame:" VerticalAlignment="Center" Margin="0,0,0,6" FontSize="12" />
+                <ComboBox Grid.Row="5" Grid.Column="1" ItemsSource="{Binding FrameTypes}" SelectedItem="{Binding SelectedFrame}" Width="150" Margin="0,0,0,6" FontSize="12" />
+
+                <TextBlock Grid.Row="6" Grid.Column="0" Text="Width (m):" VerticalAlignment="Center" Margin="0,0,0,6" FontSize="12" />
+                <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding Width}" Width="90" Margin="0,0,0,6" FontSize="12" />
+                <TextBlock Grid.Row="6" Grid.Column="3" Text="Height (m):" VerticalAlignment="Center" Margin="0,0,0,6" FontSize="12" />
+                <TextBox Grid.Row="6" Grid.Column="4" Text="{Binding Height}" Width="90" Margin="0,0,0,6" FontSize="12" />
+
+                <TextBlock Grid.Row="7" Grid.Column="0" Text="P (mm):" VerticalAlignment="Center" Margin="0,0,0,6" FontSize="12" />
+                <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding P}" Width="90" Margin="0,0,0,6" FontSize="12" />
+                <TextBlock Grid.Row="7" Grid.Column="3" Text="G (mm):" VerticalAlignment="Center" Margin="0,0,0,6" FontSize="12" />
+                <TextBox Grid.Row="7" Grid.Column="4" Text="{Binding G}" Width="90" Margin="0,0,0,6" FontSize="12" />
+
+                <TextBlock Grid.Row="8" Grid.Column="0" Text="U-Value:" VerticalAlignment="Center" Margin="0,0,0,6" FontSize="12" />
+                <TextBox Grid.Row="8" Grid.Column="1" Text="{Binding UValue}" Width="90" Margin="0,0,0,6" FontSize="12" />
+                <TextBlock Grid.Row="8" Grid.Column="3" Text="SHGC:" VerticalAlignment="Center" Margin="0,0,0,6" FontSize="12" />
+                <TextBox Grid.Row="8" Grid.Column="4" Text="{Binding Shgc}" Width="90" Margin="0,0,0,6" FontSize="12" />
+
+                <TextBlock Grid.Row="9" Grid.Column="0" Text="Room Name:" VerticalAlignment="Center" Margin="0,0,0,6" FontSize="12" />
+                <TextBox Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="4" Text="{Binding RoomName}" Width="284" HorizontalAlignment="Left" Margin="0,0,0,6" FontSize="12" />
+            </Grid>
+        </ScrollViewer>
+    </DockPanel>
+</Window>

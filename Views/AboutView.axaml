@@ -1,0 +1,44 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:FenCalc2.ViewModels"
+        x:Class="FenCalc2.Views.AboutView"
+        x:DataType="vm:AboutViewModel"
+        Title="About FenCalc2"
+        Icon="avares://FenCalc2/Assets/FenCalc2.ico"
+        Width="420"
+        SizeToContent="Height"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner">
+
+    <DockPanel Margin="16">
+        <StackPanel DockPanel.Dock="Bottom"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="0,12,0,0">
+            <Button Content="Close" Command="{Binding CloseCommand}" Width="80" Padding="6,4" IsDefault="True" />
+        </StackPanel>
+
+        <StackPanel Spacing="10">
+            <StackPanel Orientation="Horizontal" Spacing="14">
+                <Image Source="avares://FenCalc2/Assets/FenCalc2.png" Width="64" Height="64" />
+                <StackPanel Spacing="3" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding AppName}" FontSize="18" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding VersionText}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <TextBlock Text="{Binding Tagline}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" MaxWidth="290" />
+                </StackPanel>
+            </StackPanel>
+
+            <TextBlock Text="{Binding CopyrightText}" FontSize="11" FontWeight="SemiBold" />
+
+            <!-- Full MIT text so the copyright + permission notice ships with the app UI. -->
+            <Border Background="{DynamicResource SunkenBrush}" CornerRadius="4" Padding="10">
+                <ScrollViewer MaxHeight="190">
+                    <TextBlock Text="{Binding LicenseText}"
+                               FontSize="10.5"
+                               FontFamily="Consolas, Courier New, monospace"
+                               TextWrapping="Wrap" />
+                </ScrollViewer>
+            </Border>
+        </StackPanel>
+    </DockPanel>
+</Window>

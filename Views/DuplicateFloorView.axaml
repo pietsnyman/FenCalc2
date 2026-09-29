@@ -1,0 +1,38 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:FenCalc2.ViewModels"
+        x:Class="FenCalc2.Views.DuplicateFloorView"
+        x:DataType="vm:DuplicateFloorViewModel"
+        Title="Duplicate Floor"
+        Width="232" Height="270"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+
+    <DockPanel Margin="16">
+        <StackPanel DockPanel.Dock="Bottom" Spacing="6" Margin="0,12,0,0">
+            <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource DangerBrush}" FontSize="11" TextWrapping="Wrap" HorizontalAlignment="Left" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                <Button Content="Duplicate" Command="{Binding OkCommand}" Width="80" Padding="6,4" />
+                <Button Content="Cancel" Command="{Binding CancelCommand}" Click="OnCancelClick" Width="80" Padding="6,4" />
+            </StackPanel>
+        </StackPanel>
+
+        <StackPanel Spacing="8">
+            <StackPanel Spacing="4">
+                <TextBlock Text="Floor to duplicate:" FontSize="12" />
+                <ComboBox ItemsSource="{Binding SourceFloorNames}" SelectedItem="{Binding SelectedSourceFloor}" Width="200" FontSize="12" />
+            </StackPanel>
+            <StackPanel Spacing="4">
+                <TextBlock Text="New floor name:" FontSize="12" />
+                <TextBox Text="{Binding NewFloorName}" Width="200" FontSize="12" />
+            </StackPanel>
+            <StackPanel Spacing="4">
+                <TextBlock Text="Number of copies:" FontSize="12" />
+                <TextBox Text="{Binding Copies}" Width="200" FontSize="12" />
+            </StackPanel>
+            <TextBlock Text="Area and plan image are inherited from the floor below each new floor; windows are copied from the source. Extra copies get the next free floor names."
+                       FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"
+                       TextWrapping="Wrap" />
+        </StackPanel>
+    </DockPanel>
+</Window>

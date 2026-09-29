@@ -1,0 +1,21 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:FenCalc2.ViewModels"
+        x:Class="FenCalc2.Views.AddRangeView"
+        x:DataType="vm:AddRangeViewModel"
+        Title="Add Window Range"
+        Width="350" Height="150"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+    <DockPanel Margin="16">
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,12,0,0">
+            <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource DangerBrush}" FontSize="11" VerticalAlignment="Center" />
+            <Button Content="OK" Command="{Binding OkCommand}" Width="80" Padding="6,4" />
+            <Button Content="Cancel" Command="{Binding CancelCommand}" Click="OnCancelClick" Width="80" Padding="6,4" />
+        </StackPanel>
+        <StackPanel Spacing="4">
+            <TextBlock Text="Range Name:" FontSize="12" />
+            <TextBox Text="{Binding RangeName}" FontSize="12" />
+        </StackPanel>
+    </DockPanel>
+</Window>

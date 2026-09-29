@@ -1,0 +1,385 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:FenCalc2.ViewModels"
+        xmlns:views="using:FenCalc2.Views"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
+        x:Class="FenCalc2.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="FenCalc2"
+        Icon="avares://FenCalc2/Assets/FenCalc2.ico"
+        Width="1200" Height="800"
+        WindowStartupLocation="CenterScreen">
+
+    <Design.DataContext>
+        <vm:MainViewModel />
+    </Design.DataContext>
+
+    <Window.Styles>
+        <!-- Compass window cards: visible at rest (white + thin frame), tint on hover,
+             stronger tint while selected so the editor target stays obvious. -->
+        <Style Selector="ListBox.cardlist">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <Style Selector="ListBox.cardlist > ListBoxItem">
+            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource HairlineBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="3" />
+            <Setter Property="Margin" Value="1" />
+            <Setter Property="Padding" Value="4,2" />
+        </Style>
+        <Style Selector="ListBox.cardlist > ListBoxItem:pointerover">
+            <Setter Property="Background" Value="{DynamicResource AccentTintBrush}" />
+        </Style>
+        <Style Selector="ListBox.cardlist > ListBoxItem:selected">
+            <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        </Style>
+    </Window.Styles>
+
+    <DockPanel>
+        <!-- Menu Bar -->
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_Project">
+                <MenuItem Header="_New Project" Command="{Binding NewProjectCommand}" />
+                <MenuItem Header="_Open Project" Command="{Binding OpenProjectCommand}" />
+                <Separator />
+                <MenuItem Header="_Delete Project" Command="{Binding DeleteProjectCommand}" />
+                <Separator />
+                <MenuItem Header="New From _Existing" Command="{Binding NewFromExistingCommand}" />
+                <MenuItem Header="_Duplicate Floor" Command="{Binding DuplicateFloorCommand}" />
+                <MenuItem Header="_Rename Floor" Command="{Binding RenameFloorCommand}" />
+                <MenuItem Header="Delete Floor" Command="{Binding DeleteFloorCommand}" />
+                <Separator />
+                <MenuItem Header="E_xit" Click="OnExitClick" />
+            </MenuItem>
+            <MenuItem Header="_Catalogue">
+                <MenuItem Header="Add Window _Range" Command="{Binding AddRangeCommand}" />
+                <MenuItem Header="Delete Window Range" Command="{Binding DeleteRangeCommand}" />
+                <Separator />
+                <MenuItem Header="Add Window _Type" Command="{Binding AddWindowTypeCommand}" />
+                <MenuItem Header="Delete Window Type" Command="{Binding DeleteWindowTypeCommand}" />
+                <Separator />
+                <MenuItem Header="Import Old Database" Command="{Binding ImportOldDbCommand}" />
+            </MenuItem>
+            <MenuItem Header="_View">
+                <MenuItem Header="_Theme">
+                    <MenuItem x:Name="ThemeLightItem" Header="_Light" ToggleType="Radio" Click="OnThemeLightClick" />
+                    <MenuItem x:Name="ThemeDarkItem" Header="_Dark" ToggleType="Radio" Click="OnThemeDarkClick" />
+                    <MenuItem x:Name="ThemeSystemItem" Header="_System Default" ToggleType="Radio" Click="OnThemeSystemClick" />
+                    <Separator />
+                    <MenuItem x:Name="ThemeOliveItem" Header="_Olive Green" ToggleType="Radio" Click="OnThemeOliveClick" />
+                    <MenuItem x:Name="ThemeBurntItem" Header="_Burnt Orange" ToggleType="Radio" Click="OnThemeBurntClick" />
+                    <MenuItem x:Name="ThemeMulberryItem" Header="_Mulberry" ToggleType="Radio" Click="OnThemeMulberryClick" />
+                    <MenuItem x:Name="ThemeSageItem" Header="_Sage" ToggleType="Radio" Click="OnThemeSageClick" />
+                </MenuItem>
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="_Getting Started" Command="{Binding GettingStartedCommand}" />
+                <MenuItem Header="_About" Command="{Binding AboutCommand}" />
+            </MenuItem>
+        </Menu>
+
+        <!-- Status Bar -->
+        <Border DockPanel.Dock="Bottom" Background="{DynamicResource SunkenBrush}" Padding="8,4">
+            <TextBlock Text="{Binding ImportResultMessage}" FontSize="12" />
+        </Border>
+
+        <!-- Main Content: Project Info | Compass | Editor + Output -->
+        <Grid ColumnDefinitions="220,*,450" RowDefinitions="*">
+            <!-- Left Panel: Project Info -->
+            <Border Grid.Column="0" Background="{DynamicResource PanelBrush}" Padding="12" BorderBrush="{DynamicResource HairlineBrush}" BorderThickness="6,6,3,6">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Project Info" FontWeight="SemiBold" FontSize="13" />
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Client:" FontSize="12" />
+                        <TextBlock Text="{Binding ClientName}" FontSize="12" FontWeight="SemiBold" />
+                    </StackPanel>
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Project:" FontSize="12" />
+                        <TextBlock Text="{Binding ProjectName}" FontSize="12" FontWeight="SemiBold" />
+                    </StackPanel>
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Building:" FontSize="12" />
+                        <TextBlock Text="{Binding BuildingName}" FontSize="12" FontWeight="SemiBold" />
+                    </StackPanel>
+                    <Separator />
+                    <StackPanel Spacing="4">
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right" Content="+" Command="{Binding AddFloorCommand}" ToolTip.Tip="Add a new empty floor (next free name; area and plan image inherited from the floor below) and switch to it" Padding="7,0" MinHeight="0" Height="20" FontSize="12" />
+                            <TextBlock Text="Floor:" FontSize="12" VerticalAlignment="Center" />
+                        </DockPanel>
+                        <ComboBox ItemsSource="{Binding FloorNames}" SelectedItem="{Binding SelectedFloorName}" ToolTip.Tip="Switch the active floor shown on the compass" FontSize="12" Width="187" />
+                        <TextBlock Text="{Binding FloorCountText}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    </StackPanel>
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Floor Area (m²):" FontSize="12" />
+                        <TextBox x:Name="FloorAreaBox" Text="{Binding FloorArea}" ToolTip.Tip="Floor area in m² — drives the floor-area ratio and constants" FontSize="12" />
+                    </StackPanel>
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Climate Zone:" FontSize="12" />
+                        <ComboBox ItemsSource="{Binding ClimateZones}" SelectedItem="{Binding SelectedClimateZone}" ToolTip.Tip="SANS 10400-XA zone (1–6): sets the solar calculation constants" FontSize="12" Width="187" />
+                    </StackPanel>
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Orientation:" FontSize="12" />
+                        <ComboBox ItemsSource="{Binding Orientations}" SelectedItem="{Binding SelectedOrientation}" ToolTip.Tip="The direction at the TOP of the plan; picking one rotates the ring (absolute)" FontSize="12" Width="187" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Middle Column: Compass only — square-ish tiles, taller image cell -->
+            <Border Grid.Column="1" Background="{DynamicResource SurfaceBrush}" Padding="8" BorderBrush="{DynamicResource HairlineBrush}" BorderThickness="3,6,3,6" PointerWheelChanged="CompassWheel_Changed">
+                    <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="*,*,*">
+                        <TextBlock Grid.Row="0" Grid.ColumnSpan="3" Text="Compass View" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,8" />
+
+                        <Border Grid.Row="1" Grid.ColumnSpan="3" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource HairlineBrush}" BorderThickness="1" CornerRadius="4" Margin="4">
+                            <Grid RowDefinitions="*,*,*" ColumnDefinitions="*,*,*">
+                                <!-- NW -->
+                                <Border Grid.Row="0" Grid.Column="0" Background="{Binding LabelNW, Converter={x:Static views:CompassConverters.NorthTileBrush}}" Margin="2" Padding="6" CornerRadius="4" Tag="North West" Tapped="CompassTile_Tapped">
+                                    <Border.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Add Window Here" Command="{Binding AddWindowCommand}" CommandParameter="{Binding LabelNW}" />
+                                        </ContextMenu>
+                                    </Border.ContextMenu>
+                                    <DockPanel>
+                                        <TextBlock DockPanel.Dock="Top" Text="{Binding LabelNW}" ToolTip.Tip="Empty area: tap to add a window here · click a listed window to select and edit it" FontWeight="Bold" FontSize="11" HorizontalAlignment="Center" Margin="0,0,0,4" />
+                                        <ListBox x:Name="LbNW" Classes="cardlist" ItemsSource="{Binding NorthWestWindows}" SelectedItem="{Binding SelectedWindowCard, Mode=TwoWay}" Background="Transparent" BorderThickness="0" Padding="0" FontSize="11" MaxHeight="180" SelectionChanged="Compass_SelectionChanged">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:WindowCard">
+                                                    <TextBlock Text="{Binding DisplayName}" Margin="2,1" />
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                    </DockPanel>
+                                </Border>
+                                <!-- N -->
+                                <Border Grid.Row="0" Grid.Column="1" Background="{Binding LabelN, Converter={x:Static views:CompassConverters.NorthTileBrush}}" Margin="2" Padding="6" CornerRadius="4" Tag="North" Tapped="CompassTile_Tapped">
+                                    <Border.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Add Window Here" Command="{Binding AddWindowCommand}" CommandParameter="{Binding LabelN}" />
+                                        </ContextMenu>
+                                    </Border.ContextMenu>
+                                    <DockPanel>
+                                        <TextBlock DockPanel.Dock="Top" Text="{Binding LabelN}" ToolTip.Tip="Empty area: tap to add a window here · click a listed window to select and edit it" FontWeight="Bold" FontSize="11" HorizontalAlignment="Center" Margin="0,0,0,4" />
+                                        <ListBox x:Name="LbN" Classes="cardlist" ItemsSource="{Binding NorthWindows}" SelectedItem="{Binding SelectedWindowCard, Mode=TwoWay}" Background="Transparent" BorderThickness="0" Padding="0" FontSize="11" MaxHeight="180" SelectionChanged="Compass_SelectionChanged">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:WindowCard">
+                                                    <TextBlock Text="{Binding DisplayName}" Margin="2,1" />
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                    </DockPanel>
+                                </Border>
+                                <!-- NE -->
+                                <Border Grid.Row="0" Grid.Column="2" Background="{Binding LabelNE, Converter={x:Static views:CompassConverters.NorthTileBrush}}" Margin="2" Padding="6" CornerRadius="4" Tag="North East" Tapped="CompassTile_Tapped">
+                                    <Border.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Add Window Here" Command="{Binding AddWindowCommand}" CommandParameter="{Binding LabelNE}" />
+                                        </ContextMenu>
+                                    </Border.ContextMenu>
+                                    <DockPanel>
+                                        <TextBlock DockPanel.Dock="Top" Text="{Binding LabelNE}" ToolTip.Tip="Empty area: tap to add a window here · click a listed window to select and edit it" FontWeight="Bold" FontSize="11" HorizontalAlignment="Center" Margin="0,0,0,4" />
+                                        <ListBox x:Name="LbNE" Classes="cardlist" ItemsSource="{Binding NorthEastWindows}" SelectedItem="{Binding SelectedWindowCard, Mode=TwoWay}" Background="Transparent" BorderThickness="0" Padding="0" FontSize="11" MaxHeight="180" SelectionChanged="Compass_SelectionChanged">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:WindowCard">
+                                                    <TextBlock Text="{Binding DisplayName}" Margin="2,1" />
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                    </DockPanel>
+                                </Border>
+
+                                <!-- W -->
+                                <Border Grid.Row="1" Grid.Column="0" Background="{Binding LabelW, Converter={x:Static views:CompassConverters.NorthTileBrush}}" Margin="2" Padding="6" CornerRadius="4" Tag="West" Tapped="CompassTile_Tapped">
+                                    <Border.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Add Window Here" Command="{Binding AddWindowCommand}" CommandParameter="{Binding LabelW}" />
+                                        </ContextMenu>
+                                    </Border.ContextMenu>
+                                    <DockPanel>
+                                        <TextBlock DockPanel.Dock="Top" Text="{Binding LabelW}" ToolTip.Tip="Empty area: tap to add a window here · click a listed window to select and edit it" FontWeight="Bold" FontSize="11" HorizontalAlignment="Center" Margin="0,0,0,4" />
+                                        <ListBox x:Name="LbW" Classes="cardlist" ItemsSource="{Binding WestWindows}" SelectedItem="{Binding SelectedWindowCard, Mode=TwoWay}" Background="Transparent" BorderThickness="0" Padding="0" FontSize="11" MaxHeight="180" SelectionChanged="Compass_SelectionChanged">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:WindowCard">
+                                                    <TextBlock Text="{Binding DisplayName}" Margin="2,1" />
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                    </DockPanel>
+                                </Border>
+                                <!-- Center: Image -->
+                                <Border Grid.Row="1" Grid.Column="1" Background="{DynamicResource PanelBrush}" Margin="2" Padding="8" CornerRadius="4" MinHeight="120" Tapped="FloorPlanBox_Tapped" ToolTip.Tip="Click to choose a floor plan image for this floor (flips with Mirror)">
+                                    <Panel>
+                                        <TextBlock Text="[Floor Plan Image]" HorizontalAlignment="Center" VerticalAlignment="Center" FontStyle="Italic" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                        <Image x:Name="FloorPlanImage" Source="{Binding FloorPlanImage}" Stretch="Uniform" MaxHeight="240" RenderTransformOrigin="0.5,0.5" IsVisible="{Binding FloorPlanImage, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                    </Panel>
+                                </Border>
+                                <!-- E -->
+                                <Border Grid.Row="1" Grid.Column="2" Background="{Binding LabelE, Converter={x:Static views:CompassConverters.NorthTileBrush}}" Margin="2" Padding="6" CornerRadius="4" Tag="East" Tapped="CompassTile_Tapped">
+                                    <Border.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Add Window Here" Command="{Binding AddWindowCommand}" CommandParameter="{Binding LabelE}" />
+                                        </ContextMenu>
+                                    </Border.ContextMenu>
+                                    <DockPanel>
+                                        <TextBlock DockPanel.Dock="Top" Text="{Binding LabelE}" ToolTip.Tip="Empty area: tap to add a window here · click a listed window to select and edit it" FontWeight="Bold" FontSize="11" HorizontalAlignment="Center" Margin="0,0,0,4" />
+                                        <ListBox x:Name="LbE" Classes="cardlist" ItemsSource="{Binding EastWindows}" SelectedItem="{Binding SelectedWindowCard, Mode=TwoWay}" Background="Transparent" BorderThickness="0" Padding="0" FontSize="11" MaxHeight="180" SelectionChanged="Compass_SelectionChanged">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:WindowCard">
+                                                    <TextBlock Text="{Binding DisplayName}" Margin="2,1" />
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                    </DockPanel>
+                                </Border>
+
+                                <!-- SW -->
+                                <Border Grid.Row="2" Grid.Column="0" Background="{Binding LabelSW, Converter={x:Static views:CompassConverters.NorthTileBrush}}" Margin="2" Padding="6" CornerRadius="4" Tag="South West" Tapped="CompassTile_Tapped">
+                                    <Border.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Add Window Here" Command="{Binding AddWindowCommand}" CommandParameter="{Binding LabelSW}" />
+                                        </ContextMenu>
+                                    </Border.ContextMenu>
+                                    <DockPanel>
+                                        <TextBlock DockPanel.Dock="Top" Text="{Binding LabelSW}" ToolTip.Tip="Empty area: tap to add a window here · click a listed window to select and edit it" FontWeight="Bold" FontSize="11" HorizontalAlignment="Center" Margin="0,0,0,4" />
+                                        <ListBox x:Name="LbSW" Classes="cardlist" ItemsSource="{Binding SouthWestWindows}" SelectedItem="{Binding SelectedWindowCard, Mode=TwoWay}" Background="Transparent" BorderThickness="0" Padding="0" FontSize="11" MaxHeight="180" SelectionChanged="Compass_SelectionChanged">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:WindowCard">
+                                                    <TextBlock Text="{Binding DisplayName}" Margin="2,1" />
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                    </DockPanel>
+                                </Border>
+                                <!-- S -->
+                                <Border Grid.Row="2" Grid.Column="1" Background="{Binding LabelS, Converter={x:Static views:CompassConverters.NorthTileBrush}}" Margin="2" Padding="6" CornerRadius="4" Tag="South" Tapped="CompassTile_Tapped">
+                                    <Border.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Add Window Here" Command="{Binding AddWindowCommand}" CommandParameter="{Binding LabelS}" />
+                                        </ContextMenu>
+                                    </Border.ContextMenu>
+                                    <DockPanel>
+                                        <TextBlock DockPanel.Dock="Top" Text="{Binding LabelS}" ToolTip.Tip="Empty area: tap to add a window here · click a listed window to select and edit it" FontWeight="Bold" FontSize="11" HorizontalAlignment="Center" Margin="0,0,0,4" />
+                                        <ListBox x:Name="LbS" Classes="cardlist" ItemsSource="{Binding SouthWindows}" SelectedItem="{Binding SelectedWindowCard, Mode=TwoWay}" Background="Transparent" BorderThickness="0" Padding="0" FontSize="11" MaxHeight="180" SelectionChanged="Compass_SelectionChanged">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:WindowCard">
+                                                    <TextBlock Text="{Binding DisplayName}" Margin="2,1" />
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                    </DockPanel>
+                                </Border>
+                                <!-- SE -->
+                                <Border Grid.Row="2" Grid.Column="2" Background="{Binding LabelSE, Converter={x:Static views:CompassConverters.NorthTileBrush}}" Margin="2" Padding="6" CornerRadius="4" Tag="South East" Tapped="CompassTile_Tapped">
+                                    <Border.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Add Window Here" Command="{Binding AddWindowCommand}" CommandParameter="{Binding LabelSE}" />
+                                        </ContextMenu>
+                                    </Border.ContextMenu>
+                                    <DockPanel>
+                                        <TextBlock DockPanel.Dock="Top" Text="{Binding LabelSE}" ToolTip.Tip="Empty area: tap to add a window here · click a listed window to select and edit it" FontWeight="Bold" FontSize="11" HorizontalAlignment="Center" Margin="0,0,0,4" />
+                                        <ListBox x:Name="LbSE" Classes="cardlist" ItemsSource="{Binding SouthEastWindows}" SelectedItem="{Binding SelectedWindowCard, Mode=TwoWay}" Background="Transparent" BorderThickness="0" Padding="0" FontSize="11" MaxHeight="180" SelectionChanged="Compass_SelectionChanged">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:WindowCard">
+                                                    <TextBlock Text="{Binding DisplayName}" Margin="2,1" />
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                    </DockPanel>
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                        <!-- Compass Controls (wrap in the narrower middle column) -->
+                        <WrapPanel Grid.Row="2" Grid.ColumnSpan="3" HorizontalAlignment="Center" Margin="0,8,0,0">
+                            <Button Content="Add Window..." ToolTip.Tip="Open the Add Window dialog for the top-centre plan box (uses its current direction label)" Command="{Binding AddWindowCommand}" CommandParameter="{Binding LabelN}" Padding="8,4" FontWeight="SemiBold" Margin="0,0,8,4" />
+                            <Button Content="Rotate Clockwise" ToolTip.Tip="Shift the direction ring one step clockwise — windows stay pinned to their plan boxes" Command="{Binding RotateClockwiseCommand}" Padding="8,4" Margin="0,0,8,4" />
+                            <Button Content="Rotate Anticlockwise" ToolTip.Tip="Shift the direction ring one step anticlockwise — windows stay pinned to their plan boxes" Command="{Binding RotateAnticlockwiseCommand}" Padding="8,4" Margin="0,0,8,4" />
+                            <Button Content="Mirror Building" ToolTip.Tip="Mirror left↔right: swaps window directions and flips the plan image" Command="{Binding MirrorBuildingCommand}" Padding="8,4" Margin="0,0,8,4" />
+                        </WrapPanel>
+                    </Grid>
+                </Border>
+
+            <!-- Right Column: Selected Window editor (top) + Output (bottom) -->
+            <Grid Grid.Column="2" RowDefinitions="Auto,*">
+
+                <!-- Selected Window Editor -->
+                <Border Grid.Row="0" Background="{DynamicResource SurfaceBrush}" Padding="8" BorderBrush="{DynamicResource HairlineBrush}" BorderThickness="3,6,6,3">
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Selected Window" FontWeight="SemiBold" FontSize="13" />
+                        <Grid ColumnDefinitions="60,78,46,70" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Range:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,6" />
+                            <ComboBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3" ItemsSource="{Binding SelRangeNames}" SelectedItem="{Binding SelRange}" ToolTip.Tip="Catalogue range of the selected type; changing it selects that range's first type" FontSize="12" Width="194" Margin="0,0,0,6" />
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Type:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,6" />
+                            <!-- AutoCompleteBox instead of ComboBox: looks like a dropdown but also
+                                 accepts typed custom names (saved under the Custom range on Apply). -->
+                            <AutoCompleteBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding SelWinType, Mode=OneWay}" ItemsSource="{Binding SelWinTypeNames}" ToolTip.Tip="Pick a type, or type a new name — saved under the Custom range on Apply"
+                                             TextChanged="OnSelWinTypeTextChanged" MinimumPrefixLength="0"
+                                             MaxDropDownHeight="200" FontSize="12" Margin="0,0,0,6" />
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Orient:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,6" />
+                            <ComboBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" ItemsSource="{Binding SelOrientations}" SelectedItem="{Binding SelOrientation}" ToolTip.Tip="The direction this window faces; stored as its plan box until Apply" FontSize="12" Width="194" Margin="0,0,0,6" />
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Floor:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,6" />
+                            <ComboBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" ItemsSource="{Binding SelFloorNames}" SelectedItem="{Binding SelFloor}" ToolTip.Tip="Floor this window belongs to — change it and Apply Changes to move the window (the compass follows)" FontSize="12" Width="194" Margin="0,0,0,6" />
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Glass:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,6" />
+                            <ComboBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" ItemsSource="{Binding SelGlassNames}" SelectedItem="{Binding SelGlass}" ToolTip.Tip="Glazing type — U-value and SHGC recompute when changed" FontSize="12" Width="194" Margin="0,0,0,6" />
+
+                            <TextBlock Grid.Row="5" Grid.Column="0" Text="Frame:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,0" />
+                            <ComboBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="3" ItemsSource="{Binding SelFrameNames}" SelectedItem="{Binding SelFrame}" ToolTip.Tip="Frame material — U-value and SHGC recompute when changed" FontSize="12" Width="194" />
+                        </Grid>
+                        <Grid ColumnDefinitions="60,78,46,70" RowDefinitions="Auto,Auto,Auto,Auto">
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="W:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,6" />
+                            <TextBox Grid.Row="0" Grid.Column="1" x:Name="SelWidthBox" Text="{Binding SelWidth}" ToolTip.Tip="Editing this creates a Custom-range type on Apply (original entry unchanged)" FontSize="12" Margin="0,0,8,6" />
+                            <TextBlock Grid.Row="0" Grid.Column="2" Text="H:" VerticalAlignment="Center" FontSize="12" Margin="0,0,6,6" />
+                            <TextBox Grid.Row="0" Grid.Column="3" x:Name="SelHeightBox" Text="{Binding SelHeight}" ToolTip.Tip="Editing this creates a Custom-range type on Apply (original entry unchanged)" FontSize="12" Margin="0,0,0,6" />
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="P:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,6" />
+                            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding SelP}" ToolTip.Tip="P value in mm (part of the P/H expression in the output)" FontSize="12" Margin="0,0,8,6" />
+                            <TextBlock Grid.Row="1" Grid.Column="2" Text="G:" VerticalAlignment="Center" FontSize="12" Margin="0,0,6,6" />
+                            <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding SelG}" ToolTip.Tip="G value in mm (added to window height in the P/H expression)" FontSize="12" Margin="0,0,0,6" />
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="U:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,6" />
+                            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding SelUValue}" ToolTip.Tip="U-value W/m²·K — type override or glazing default; editable for tested values" FontSize="12" Margin="0,0,8,6" />
+                            <TextBlock Grid.Row="2" Grid.Column="2" Text="SHGC:" VerticalAlignment="Center" FontSize="12" Margin="0,0,6,6" />
+                            <TextBox Grid.Row="2" Grid.Column="3" Text="{Binding SelSHGC}" ToolTip.Tip="Solar Heat Gain Coefficient — editable for manufacturer-tested values" FontSize="12" Margin="0,0,0,6" />
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Area:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,0" />
+                            <TextBlock Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding SelArea}" ToolTip.Tip="Width × height of the staged window (updates when you leave W or H)" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" />
+                        </Grid>
+                        <!-- Editor status line: W/H mismatch warnings, custom-type save notes -->
+                        <TextBlock Text="{Binding EditorStatus}" FontSize="11" Foreground="{Binding EditorStatusForeground}" TextWrapping="Wrap" />
+                        <!-- Action Buttons (wrap if the column is narrow) -->
+                        <WrapPanel HorizontalAlignment="Left">
+                            <Button Content="Apply Changes" Classes="primary" ToolTip.Tip="Save all edits to the database and recalculate the output" Command="{Binding ApplyChangesCommand}" Padding="8,4" FontWeight="SemiBold" Margin="0,0,6,4" />
+                            <Button Content="Remove" Classes="quiet" ToolTip.Tip="Delete the selected window from this floor (immediate)" Command="{Binding RemoveWindowCommand}" Padding="8,4" Margin="0,0,6,4" />
+                            <Button Content="Copy to..." ToolTip.Tip="Copy this window to any combination of floors and directions — one new window per checked combination" Command="{Binding CopyWindowToCommand}" Padding="8,4" Margin="0,0,6,4" />
+                        </WrapPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Output Panel (fills the star row: taller + thinner) -->
+                <Border Grid.Row="1" Background="{DynamicResource SurfaceBrush}" Padding="8" BorderBrush="{DynamicResource HairlineBrush}" BorderThickness="3,3,6,6">
+                    <DockPanel>
+                <!-- WrapPanel (not StackPanel): title + 2 radios + 2 checkboxes + copy
+                     button no longer fit on one line in the 450px column. -->
+                <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,6">
+                    <TextBlock Text="Output" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <RadioButton Content="2 dec" ToolTip.Tip="Show 2 decimal places — calculations always use 3; floor area and the floor-area ratio are always 2" GroupName="Decimals" IsChecked="{Binding !UseThreeDecimals}" FontSize="11" Margin="0,0,8,0" />
+                    <RadioButton Content="3 dec" ToolTip.Tip="Show 3 decimal places (floor area and ratio stay 2)" GroupName="Decimals" IsChecked="{Binding UseThreeDecimals}" FontSize="11" Margin="0,0,8,0" />
+                    <CheckBox Content="Capitalize" ToolTip.Tip="Uppercase output labels; window type names unchanged" IsChecked="{Binding CapitalizeOutput}" FontSize="11" Margin="0,0,8,0" />
+                    <CheckBox Content="Combine floors" ToolTip.Tip="Calculate all floors together as one building — off (default): every floor calculated separately with its own area, ratio and totals" IsChecked="{Binding CombineFloors}" FontSize="11" Margin="0,0,8,0" />
+                    <Button Content="Copy to Clipboard" ToolTip.Tip="Copy the whole output text to the clipboard" Command="{Binding CopyOutputCommand}" Padding="6,2" FontSize="11" />
+                </WrapPanel>
+                        <TextBox Text="{Binding OutputText}" FontFamily="Consolas, Courier New, monospace" FontSize="12" IsReadOnly="True" AcceptsReturn="True" TextWrapping="NoWrap" Background="{DynamicResource SunkenBrush}" />
+                    </DockPanel>
+                </Border>
+            </Grid>
+        </Grid>
+    </DockPanel>
+</Window>
