@@ -17,18 +17,25 @@ window-to-floor-area ratio, U-values, solar heat gain for each orientation of th
 and conductance totals — all delivered as a plain-text report you can paste into your own
 documents.
 
+<p align="center">
+  <img src="docs/images/main-window.png" width="880"
+       alt="FenCalc2 main window: compass plan view around a floor-plan image, the selected-window editor on the right, and the calculation report underneath">
+</p>
+<p align="center"><em>The main window: your plan image in the middle, windows listed on the
+eight compass directions, the selected window on the right, and the report underneath.</em></p>
+
 **Who it is for:** architectural professionals, building-energy consultants and students who
 already work with SANS 10400-XA.
 
 **What you need to know first:** U-value, SHGC (g-value), window-to-floor-area ratio,
 climate zones, and the P and G values used in the shading expression. FenCalc2 performs the
 arithmetic — it does not teach the standard. If those terms are unfamiliar, read
-**SANS 10400-XA: The design of buildings for thermal comfort** before relying on any output.
+**SANS 10400-XA: The design of buildings for thermal comfort** before you start.
 
-> ⚠️ **Verify everything — no liability.** Results are only as good as the data you enter.
-> Check every value against SANS 10400-XA and the manufacturer's tested data. The software
-> is provided as-is, without warranty of any kind, and the author accepts no liability for
-> any decision, loss or damage arising from its use.
+> **A note on checking your work.** FenCalc2 does the arithmetic quickly, so you can spend
+> your time on the judgement calls. Give its output the same pass you would give any
+> spreadsheet — inputs against SANS 10400-XA and your manufacturer's tested data — before it
+> goes into a submission. Provided as-is under the MIT licence, without warranty.
 
 ## Features
 
@@ -51,6 +58,56 @@ arithmetic — it does not teach the standard. If those terms are unfamiliar, re
 
 The in-app **Help > Getting Started** guide walks through the whole workflow, including a
 worked example of creating a top-hung aluminium range.
+
+## Example output
+
+Exactly what the Output panel produces for a small single-storey building — also saved as
+[`docs/example-output.txt`](docs/example-output.txt). Paste it as plain text into a
+**monospace** font (Consolas, Courier New) and the columns line up:
+
+```text
+FENESTRATION CALCULATIONS:
+-------------------------
+CLIMATE ZONE: ZONE 1
+
+FLOOR AREA: 69,58
+
+FENESTRATION AREA:
+PT159    : 1 x 1,500 x 0,900 = 1,350
+PT69     : 2 x 0,600 x 0,900 = 1,080
+PTT1515  : 4 x 1,500 x 1,500 = 9,000
+SD1821XO : 1 x 1,800 x 2,100 = 3,780
+TOTAL:                        15,210
+
+WINDOW TO FLOOR AREA RATIO: 15,210 / 69,58 * 100 = 21,86%
+
+CONSTANTS:
+CONDUCTANCE: 69,58 X 1,2  = 83,496
+SHG        : 69,58 X 0,15 = 10,437
+
+SOLAR HEAT GAIN: (AREA X SHGC X SOLAR E FACTOR)
+NORTH EAST:
+3 x PTT1515 : P/H = 375/1755 = 0,214 : 6,750 x 0,810 x 0,770 = 4,210
+SOUTH EAST:
+PT69        : P/H = 375/1155 = 0,325 : 0,540 x 0,810 x 0,590 = 0,258
+SOUTH WEST:
+PTT1515     : P/H = 375/1755 = 0,214 : 2,250 x 0,810 x 0,820 = 1,494
+PT69        : P/H = 375/1155 = 0,325 : 0,540 x 0,810 x 0,750 = 0,328
+NORTH WEST:
+SD1821XO    : P/H = 375/2355 = 0,159 : 3,780 x 0,810 x 0,970 = 2,970
+PT159       : P/H = 375/1155 = 0,325 : 1,350 x 0,810 x 0,800 = 0,875
+TOTAL:                                                        10,135
+
+CONDUCTANCE:
+PT159    : 1 x 1,350 x 7,900   = 10,665
+PT69     : 2 x 0,540 x 7,900   =  8,532
+PTT1515  : 4 x 2,250 x 7,900   = 71,100
+SD1821XO : 1 x 3,780 x 7,900   = 29,862
+TOTAL:                          120,159
+```
+
+The `2 dec` / `3 dec` radios, `Capitalize` and `Combine floors` checkboxes change the
+formatting; `Copy to Clipboard` puts the whole block on the clipboard.
 
 ## Getting started (short version)
 

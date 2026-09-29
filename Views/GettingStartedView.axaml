@@ -47,14 +47,14 @@
                            Text="It is aimed at architectural professionals, building-energy consultants and students who already work with SANS 10400-XA. You are expected to understand the standard itself — including what a U-value, SHGC (g-value), window-to-floor-area ratio, climate zone and the P and G values in the shading expression mean. This application performs the arithmetic; it does not teach the standard. If any of those terms are unfamiliar, read SANS 10400-XA: The design of buildings for thermal comfort (SANS 10400-XA, published by SABS) before relying on the output." />
 
                 <Border Background="{DynamicResource SunkenBrush}"
-                        BorderBrush="{DynamicResource WarningBrush}"
+                        BorderBrush="{DynamicResource HairlineBrush}"
                         BorderThickness="1" CornerRadius="4" Padding="10" Margin="0,8,0,0">
                     <StackPanel Spacing="4">
-                        <TextBlock Text="Verify everything — no liability"
+                        <TextBlock Text="Checking the numbers"
                                    FontSize="12" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource WarningBrush}" />
+                                   Foreground="{DynamicResource AccentBrush}" />
                         <TextBlock Classes="body"
-                                   Text="All results are only as good as the data you enter. Check every value — glazing and frame properties, dimensions, P and G values, climate zone and orientation — against SANS 10400-XA and the window manufacturer's tested data before using the output for anything that matters. The author accepts no liability for any decision, loss or damage arising from the use of this application, and the software is provided as-is under the MIT licence."
+                                   Text="FenCalc2 does the arithmetic so you can spend your time on the judgement calls. Give the output the same quick check you would give any spreadsheet — inputs against SANS 10400-XA and your manufacturer's tested data — before it goes into a submission. The software is provided as-is under the MIT licence, without warranty."
                                    Margin="0" />
                     </StackPanel>
                 </Border>
@@ -126,7 +126,7 @@
                 <TextBlock Classes="step" Text="•  Press Copy to Clipboard, then paste into your document." />
                 <TextBlock Classes="step" Text="•  Paste it as plain text in a monospace font — Consolas or Courier New — so the columns line up. In a proportional font the spacing will not align." />
                 <TextBlock Classes="step" Text="•  2 dec / 3 dec set the decimal places (calculations always use 3), Capitalize upper-cases the labels, and Combine floors calculates all floors as one building instead of one block per floor." />
-                <TextBlock Classes="step" Text="•  Read the disclaimer at the top again before you rely on any number: verify against SANS 10400-XA." />
+                <TextBlock Classes="step" Text="•  Give the numbers a quick check against SANS 10400-XA before you issue them — see the note at the top." />
 
             </StackPanel>
         </ScrollViewer>

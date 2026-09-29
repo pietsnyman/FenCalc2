@@ -1,0 +1,38 @@
+FENESTRATION CALCULATIONS:
+-------------------------
+CLIMATE ZONE: ZONE 1
+
+FLOOR AREA: 69,58
+
+FENESTRATION AREA:
+PT159    : 1 x 1,500 x 0,900 = 1,350
+PT69     : 2 x 0,600 x 0,900 = 1,080
+PTT1515  : 4 x 1,500 x 1,500 = 9,000
+SD1821XO : 1 x 1,800 x 2,100 = 3,780
+TOTAL:                        15,210
+
+WINDOW TO FLOOR AREA RATIO: 15,210 / 69,58 * 100 = 21,86%
+
+CONSTANTS:
+CONDUCTANCE: 69,58 X 1,2  = 83,496
+SHG        : 69,58 X 0,15 = 10,437
+
+SOLAR HEAT GAIN: (AREA X SHGC X SOLAR E FACTOR)
+NORTH EAST:
+3 x PTT1515 : P/H = 375/1755 = 0,214 : 6,750 x 0,810 x 0,770 = 4,210
+SOUTH EAST:
+PT69        : P/H = 375/1155 = 0,325 : 0,540 x 0,810 x 0,590 = 0,258
+SOUTH WEST:
+PTT1515     : P/H = 375/1755 = 0,214 : 2,250 x 0,810 x 0,820 = 1,494
+PT69        : P/H = 375/1155 = 0,325 : 0,540 x 0,810 x 0,750 = 0,328
+NORTH WEST:
+SD1821XO    : P/H = 375/2355 = 0,159 : 3,780 x 0,810 x 0,970 = 2,970
+PT159       : P/H = 375/1155 = 0,325 : 1,350 x 0,810 x 0,800 = 0,875
+TOTAL:                                                        10,135
+
+CONDUCTANCE:
+PT159    : 1 x 1,350 x 7,900   = 10,665
+PT69     : 2 x 0,540 x 7,900   =  8,532
+PTT1515  : 4 x 2,250 x 7,900   = 71,100
+SD1821XO : 1 x 3,780 x 7,900   = 29,862
+TOTAL:                          120,159
