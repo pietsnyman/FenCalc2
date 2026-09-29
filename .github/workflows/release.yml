@@ -1,0 +1,144 @@
+# Builds the self-contained Windows and Linux archives and publishes them to the
+# GitHub release for the pushed tag (creating or updating it) — see README,
+# "Publishing a standalone build".
+#
+#   git tag -a v1.1.0 -m "FenCalc2 1.1.0" && git push origin v1.1.0
+#
+# A "Run workflow" dispatch builds the same archives without touching any release.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Publish win-x64
+        run: dotnet publish FenCalc2.csproj -c Release -r win-x64 --self-contained true -o publish/win-x64
+
+      - name: Publish linux-x64
+        run: dotnet publish FenCalc2.csproj -c Release -r linux-x64 --self-contained true -o publish/linux-x64
+
+      - name: Package
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          ver="${tag#v}"
+          mkdir -p dist
+
+          # Stage each build under a versioned folder so extracting drops the files into
+          # one place instead of scattering them into the current directory. cp -a keeps
+          # the exec bit for the Linux binary; the Windows zip needs no modes.
+          for rid in win-x64 linux-x64; do
+            stage="dist/FenCalc2-${ver}-${rid}"
+            mkdir -p "$stage"
+            cp -a "publish/$rid/." "$stage/"
+            # Debug symbols are useless to end users and double the download
+            # (libSkiaSharp.pdb alone is ~80 MB).
+            find "$stage" -name '*.pdb' -delete
+          done
+
+          (cd dist && zip -qr "FenCalc2-${ver}-win-x64.zip" "FenCalc2-${ver}-win-x64")
+          (cd dist && tar -czf "FenCalc2-${ver}-linux-x64.tar.gz" "FenCalc2-${ver}-linux-x64")
+          rm -rf "dist/FenCalc2-${ver}-win-x64" "dist/FenCalc2-${ver}-linux-x64"
+
+          (cd dist && sha256sum ./*.zip ./*.tar.gz | sed 's|\./||' > SHA256SUMS.txt)
+
+          ls -lh dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FenCalc2-${{ github.ref_name }}
+          path: dist/*
+
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          ver="${tag#v}"
+
+          cat > dist/RELEASE_NOTES.md <<EOF
+          ## FenCalc2 ${ver}
+
+          Fenestration solar-gain calculations for **SANS 10400-XA** — Windows and Linux
+          desktop application. MIT licensed.
+
+          ### Download
+
+          | Platform | File |
+          |---|---|
+          | Windows x64 | \`FenCalc2-${ver}-win-x64.zip\` |
+          | Linux x64 | \`FenCalc2-${ver}-linux-x64.tar.gz\` |
+          | | \`SHA256SUMS.txt\` (checksums) |
+
+          Both builds are **self-contained**: no .NET runtime (or any other dependency)
+          needs to be installed.
+
+          ### Windows
+
+          1. Unzip the archive anywhere — it is portable, nothing is installed.
+          2. Double-click \`FenCalc2-${ver}-win-x64\FenCalc2.exe\`.
+          3. Windows SmartScreen may warn that the app is unrecognized — it is unsigned;
+             choose *More info* > *Run anyway* if you trust the download.
+
+          ### Linux
+
+          \`\`\`bash
+          tar -xzf FenCalc2-${ver}-linux-x64.tar.gz
+          ./FenCalc2-${ver}-linux-x64/FenCalc2
+          \`\`\`
+
+          Optional: copy \`.desktop\` launcher details from the README to add it to your
+          application menu.
+
+          ### First run
+
+          The database, its schema migrations and the starter catalogue are created
+          automatically the first time the application starts — there is nothing to
+          install or configure, and no admin rights are needed:
+
+          | | |
+          |---|---|
+          | **Windows** | \`%LOCALAPPDATA%\\FenCalc2\\Data\\FenCalc2.db\` |
+          | **Linux** | \`~/.local/share/FenCalc2/Data/FenCalc2.db\` |
+
+          ### Verify your download
+
+          \`\`\`bash
+          sha256sum -c SHA256SUMS.txt
+          \`\`\`
+
+          ---
+
+          Provided as-is under the [MIT](https://github.com/${{ github.repository }}/blob/${tag}/LICENSE)
+          licence, without warranty. FenCalc2 performs the arithmetic of
+          SANS 10400-XA — it does not replace reading the standard or checking its output.
+          EOF
+
+          # Uploads to the existing release for this tag (a draft created beforehand is
+          # found by gh's release finder), or creates one if there is none yet.
+          if ! gh release view "$tag" --repo "${{ github.repository }}" > /dev/null 2>&1; then
+            gh release create "$tag" --repo "${{ github.repository }}" \
+              --title "FenCalc2 ${ver}" --notes-file dist/RELEASE_NOTES.md --draft
+          fi
+
+          gh release upload "$tag" --repo "${{ github.repository }}" --clobber \
+            dist/*.zip dist/*.tar.gz dist/SHA256SUMS.txt
+
+          gh release edit "$tag" --repo "${{ github.repository }}" \
+            --title "FenCalc2 ${ver}" --notes-file dist/RELEASE_NOTES.md --draft=false

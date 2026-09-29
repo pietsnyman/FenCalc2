@@ -125,6 +125,38 @@ formatting; `Copy to Clipboard` puts the whole block on the clipboard.
    to move it).
 7. **Copy the output** — *Copy to Clipboard*, paste as plain text in a monospace font.
 
+## Download
+
+Grab the archive for your platform from the
+[**Releases**](https://github.com/pietsnyman/fencalc2/releases) page:
+
+| Platform | Archive | Run it |
+|---|---|---|
+| Windows x64 | `FenCalc2-<version>-win-x64.zip` | Unzip, double-click `FenCalc2.exe` |
+| Linux x64 | `FenCalc2-<version>-linux-x64.tar.gz` | Unpack, run `./FenCalc2-<version>-linux-x64/FenCalc2` |
+
+- **Self-contained** — no .NET runtime or any other dependency needs to be installed.
+- **Nothing is installed** — both archives are portable, no admin rights required.
+- On first launch the database, its migrations and the starter catalogue are created
+  automatically (see [Data and databases](#data-and-databases)).
+- Verify the download against `SHA256SUMS.txt` (`sha256sum -c SHA256SUMS.txt`).
+- Windows SmartScreen may warn that the unsigned executable is unrecognized: *More info* >
+  *Run anyway*, if you trust the source.
+
+Optional — put it in your Linux application menu by pointing `Exec` at wherever you
+unpacked it:
+
+```ini
+# ~/.local/share/applications/fencalc2.desktop
+[Desktop Entry]
+Type=Application
+Name=FenCalc2
+Comment=SANS 10400-XA fenestration calculations
+Exec=/path/to/FenCalc2-<version>-linux-x64/FenCalc2
+Icon=fencalc2
+Categories=Utility;
+```
+
 ## Building from source
 
 Requirements: the [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0).
@@ -159,6 +191,19 @@ and run).
 
 > The legacy *Import Old Database* feature uses a Windows-only SQLite component and is
 > disabled elsewhere with a status-bar message. Everything else works on both platforms.
+
+### Publishing a release
+
+Pushing a version tag builds the same archives in CI (`.github/workflows/release.yml`),
+attaches them to a GitHub release with notes and checksums, and publishes it:
+
+```bash
+git tag -a v1.1.0 -m "FenCalc2 1.1.0"
+git push origin v1.1.0
+```
+
+A manual *Run workflow* dispatch builds the archives without creating or changing any
+release.
 
 ## Data and databases
 
