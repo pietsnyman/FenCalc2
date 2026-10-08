@@ -630,6 +630,21 @@ public partial class MainViewModel : ViewModelBase
         RecalculateOutput();
     }
 
+    // Flips ONLY the displayed plan image (shared IsMirrored display flag, persisted like
+    // Mirror Building's) — window data stays exactly as it is. Needed because Mirror
+    // Building couples the slot swap with the image flip: without this, a building in the
+    // mirrored state force-flips every image that gets loaded and there is no way back
+    // without also swapping the window directions.
+    [RelayCommand]
+    private void FlipImage()
+    {
+        if (_currentProject is null) return;
+
+        _currentProject.IsMirrored = !_currentProject.IsMirrored;
+        IsMirrored = _currentProject.IsMirrored;
+        PersistCompassState();
+    }
+
     private void PersistCompassState()
     {
         if (_currentProject is null) return;

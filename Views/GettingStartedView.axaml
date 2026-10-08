@@ -90,13 +90,14 @@
                            Text="The centre box of the compass shows the plan drawing. Click it to open the Select floor plan image dialog and choose a png, jpg, jpeg or bmp — a screenshot of your drawing works perfectly." />
                 <TextBlock Classes="step" Text="•  The application copies the file into its own data folder; your original file is never moved or changed." />
                 <TextBlock Classes="step" Text="•  There is one image per floor. Each floor gets its own plan when you switch to it." />
-                <TextBlock Classes="step" Text="•  The image flips left-to-right when the building is mirrored (see below), and turns with the compass." />
+                <TextBlock Classes="step" Text="•  The image flips left-to-right when the building is mirrored (see Mirror Building and Flip Image below), and turns with the compass." />
 
                 <!-- ===================== 5. Orient the building ===================== -->
                 <TextBlock Classes="h2" Text="5. Line up the building: rotate and mirror" />
                 <TextBlock Classes="step" Text="•  Orientation (left panel) is the absolute direction at the top of the plan. Setting it re-anchors the whole compass." />
                 <TextBlock Classes="step" Text="•  Rotate Clockwise and Rotate Anticlockwise (under the compass) shift the direction ring one step at a time. Rolling the mouse wheel over the compass does the same. Windows stay pinned to their spot on the drawing — only the direction labels move." />
                 <TextBlock Classes="step" Text="•  Mirror Building flips the plan left-to-right: window directions are swapped accordingly and the image mirrors. Click it again to swap back. Use it when your drawing is a mirrored version of the real building." />
+                <TextBlock Classes="step" Text="•  Flip Image (under the compass) flips only the plan image left-to-right — the window directions stay exactly as they are. The button reads Unflip Image while the image is shown mirrored, so the picture is never silently flipped. Use it to fix the picture alone, for example after loading a new plan image into a mirrored building." />
                 <TextBlock Classes="step" Text="•  Whichever direction labels the tiles show are the true directions used in the calculation." />
 
                 <!-- ===================== 6. Add windows ===================== -->

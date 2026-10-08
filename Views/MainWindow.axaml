@@ -317,7 +317,11 @@
                             <Button Content="Add Window..." ToolTip.Tip="Open the Add Window dialog for the top-centre plan box (uses its current direction label)" Command="{Binding AddWindowCommand}" CommandParameter="{Binding LabelN}" Padding="8,4" FontWeight="SemiBold" Margin="0,0,8,4" />
                             <Button Content="Rotate Clockwise" ToolTip.Tip="Shift the direction ring one step clockwise — windows stay pinned to their plan boxes" Command="{Binding RotateClockwiseCommand}" Padding="8,4" Margin="0,0,8,4" />
                             <Button Content="Rotate Anticlockwise" ToolTip.Tip="Shift the direction ring one step anticlockwise — windows stay pinned to their plan boxes" Command="{Binding RotateAnticlockwiseCommand}" Padding="8,4" Margin="0,0,8,4" />
-                            <Button Content="Mirror Building" ToolTip.Tip="Mirror left↔right: swaps window directions and flips the plan image" Command="{Binding MirrorBuildingCommand}" Padding="8,4" Margin="0,0,8,4" />
+                            <Button Content="Mirror Building" ToolTip.Tip="Mirror left↔right: swaps window directions and flips the plan image (Flip Image flips only the image)" Command="{Binding MirrorBuildingCommand}" Padding="8,4" Margin="0,0,8,4" />
+                            <!-- Label doubles as the flip-state indicator: "Unflip Image" = the plan image is shown mirrored right now.
+                                 Width is PINNED: the label alternates widths, and in a centered WrapPanel a width change
+                                 reflows the row and moves the neighbours' hit targets (suspected cause of swallowed clicks). -->
+                            <Button Content="{Binding IsMirrored, Converter={x:Static views:CompassConverters.FlipImageLabel}}" ToolTip.Tip="Flip the plan image left↔right only — window directions stay as they are" Command="{Binding FlipImageCommand}" Padding="8,4" Margin="0,0,8,4" Width="116" />
                         </WrapPanel>
                     </Grid>
                 </Border>

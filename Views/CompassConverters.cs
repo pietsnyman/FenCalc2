@@ -28,4 +28,9 @@ public static class CompassConverters
             label == "North"
                 ? Resolve("CompassNorthBrush", "#BBDEFB")
                 : Resolve("CompassTileBrush", "#E3F2FD"));
+
+    // Flip Image button label: names the action AND shows the current flip state, so a
+    // mirrored plan image is never silently mirrored ("Unflip Image" = it is flipped now).
+    public static readonly IValueConverter FlipImageLabel =
+        new FuncValueConverter<bool, string>(mirrored => mirrored ? "Unflip Image" : "Flip Image");
 }

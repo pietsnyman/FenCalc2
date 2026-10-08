@@ -124,6 +124,7 @@ public partial class MainWindow : Window
             vm.RequestCopyToClipboard += OnRequestCopyToClipboard;
             vm.RequestLoadFloorImage += OnLoadFloorImage;
             vm.PropertyChanged += OnVmPropertyChanged;
+            ApplyImageFlip(vm.IsMirrored); // initial state — the handler only sees changes
             vm.CheckFirstLaunch();
         }
     }
@@ -332,19 +333,26 @@ public partial class MainWindow : Window
 
     private void OnVmPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(MainViewModel.IsMirrored) && DataContext is MainViewModel vm)
-        {
-            var image = this.FindControl<Image>("FloorPlanImage");
-            if (image is not null)
-            {
-                // Mirror in place: transform and center origin must both be set from code,
-                // otherwise the image is flipped around its left edge and jumps out of the box.
-                image.RenderTransformOrigin = new RelativePoint(0.5, 0.5, RelativeUnit.Relative);
-                image.RenderTransform = vm.IsMirrored
-                    ? new ScaleTransform(-1, 1)
-                    : null;
-            }
-        }
+        if (DataContext is not MainViewModel vm) return;
+
+        // Level-triggered: re-apply on every flag change AND every new bitmap, so the
+        // transform can never go stale when an image is (re)loaded or a project opens.
+        if (e.PropertyName == nameof(MainViewModel.IsMirrored)
+            || e.PropertyName == nameof(MainViewModel.FloorPlanImage))
+            ApplyImageFlip(vm.IsMirrored);
+    }
+
+    private void ApplyImageFlip(bool mirrored)
+    {
+        var image = this.FindControl<Image>("FloorPlanImage");
+        if (image is null) return;
+
+        // Mirror in place: transform and center origin must both be set from code,
+        // otherwise the image is flipped around its left edge and jumps out of the box.
+        image.RenderTransformOrigin = new RelativePoint(0.5, 0.5, RelativeUnit.Relative);
+        image.RenderTransform = mirrored
+            ? new ScaleTransform(-1, 1)
+            : null;
     }
 
     // Wheel over the compass rotates the building: up = clockwise, down = anticlockwise.
