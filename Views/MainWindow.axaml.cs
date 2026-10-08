@@ -235,13 +235,27 @@ public partial class MainWindow : Window
                 dialog.Close();
         }
 
+        // Escape = Cancel for every modal dialog: close directly (DialogResult stays
+        // false, so the OnXxxDialogClosed callback discards the action — the same
+        // contract as the Click="OnCancelClick" handlers). Subscribing to KeyDown (not
+        // preview / handled-events-too) lets an open ComboBox popup consume Escape
+        // first: the first Esc closes the dropdown, the next one closes the dialog.
+        // All modals funnel through here, so dialogs shown any other way get none of it.
+        void OnEscapeKeyDown(object? sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+                dialog.Close();
+        }
+
         vm.PropertyChanged += OnDialogPropertyChanged;
+        dialog.KeyDown += OnEscapeKeyDown;
         try
         {
             await dialog.ShowDialog(this);
         }
         finally
         {
+            dialog.KeyDown -= OnEscapeKeyDown;
             vm.PropertyChanged -= OnDialogPropertyChanged;
         }
     }
