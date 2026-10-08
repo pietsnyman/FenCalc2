@@ -15,5 +15,9 @@ public class WindowPlacement
     public double SHGC { get; set; }
     public int P { get; set; } = 375;
     public int G { get; set; } = 160;
+    // XA:2026 cl. 5.2.2 shading classification: null = automatic (P >= H x M by the
+    // project latitude), 1 = count as shaded, 0 = count as unshaded (shutters, blinds
+    // and screens that satisfy 5.2.1 b) but cannot be proven by projection alone).
+    public int? ShadingOverride { get; set; }
     public string? RoomName { get; set; }
 }

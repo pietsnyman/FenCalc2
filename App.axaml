@@ -18,8 +18,7 @@
     <!-- Central palette: understated-modern tokens. Views reference these instead of raw hex. -->
     <Application.Resources>
         <ResourceDictionary>
-            <ResourceDictionary.ThemeDictionaries>
-                <ResourceDictionary x:Key="Light">
+            <ResourceDictionary.ThemeDictionaries>                <ResourceDictionary x:Key="Light">
                     <!-- Neutral surfaces -->
                     <SolidColorBrush x:Key="SurfaceBrush" Color="#FFFFFF" />
                     <SolidColorBrush x:Key="PanelBrush" Color="#FCFCFD" />
@@ -160,6 +159,16 @@
                     <SolidColorBrush x:Key="CompassTileBrush" Color="#1D2939" />
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
+            <!-- Wall layer colours (XA:2026 Envelope window): ONE set for all theme
+                 variants — mid-tones chosen to read on both light and dark panels, so
+                 theme switching never changes them (docs/themes.md). -->
+            <SolidColorBrush x:Key="LayerFilmBrush" Color="#BFD0DE" />
+            <SolidColorBrush x:Key="LayerCavityBrush" Color="#F2F3F5" />
+            <SolidColorBrush x:Key="LayerPlasterBrush" Color="#EBDCB2" />
+            <SolidColorBrush x:Key="LayerMasonryBrush" Color="#C67B5C" />
+            <SolidColorBrush x:Key="LayerInsulationBrush" Color="#E5A8B8" />
+            <SolidColorBrush x:Key="LayerMetalBrush" Color="#9AA4AE" />
+            <SolidColorBrush x:Key="LayerOtherBrush" Color="#C9BFAD" />
         </ResourceDictionary>
     </Application.Resources>
 

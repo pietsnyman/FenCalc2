@@ -55,8 +55,10 @@ public class ProjectRepository
     {
         using var conn = _connFactory();
         return conn.ExecuteScalar<int>("""
-            INSERT INTO Projects (BuildingName, ClientName, ProjectName, ClimateZone, Orientation)
-            VALUES (@BuildingName, @ClientName, @ProjectName, @ClimateZone, @Orientation);
+            INSERT INTO Projects (BuildingName, ClientName, ProjectName, ClimateZone, Orientation,
+                                  StandardEdition, Town, Latitude, Sccp, WallEnergyZone)
+            VALUES (@BuildingName, @ClientName, @ProjectName, @ClimateZone, @Orientation,
+                    @StandardEdition, @Town, @Latitude, @Sccp, @WallEnergyZone);
             SELECT last_insert_rowid();
             """, project);
     }
@@ -68,7 +70,9 @@ public class ProjectRepository
             UPDATE Projects
             SET BuildingName = @BuildingName, ClientName = @ClientName, ProjectName = @ProjectName,
                 ClimateZone = @ClimateZone, Orientation = @Orientation,
-                RotationOffset = @RotationOffset, IsMirrored = @IsMirrored
+                RotationOffset = @RotationOffset, IsMirrored = @IsMirrored,
+                StandardEdition = @StandardEdition, Town = @Town, Latitude = @Latitude, Sccp = @Sccp,
+                WallEnergyZone = @WallEnergyZone
             WHERE Id = @Id
             """, project);
     }

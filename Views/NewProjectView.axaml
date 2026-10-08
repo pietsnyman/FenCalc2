@@ -4,7 +4,7 @@
         x:Class="FenCalc2.Views.NewProjectView"
         x:DataType="vm:NewProjectViewModel"
         Title="New Project"
-        Width="340" Height="410"
+        Width="340" Height="520"
         WindowStartupLocation="CenterOwner"
         CanResize="False">
 
@@ -27,20 +27,32 @@
             </StackPanel>
             <StackPanel Spacing="4">
                 <TextBlock Text="Project Name:" FontSize="12" />
+                <!-- OneWay + TextChanged push, same as ClientBox: without the push the
+                     typed name never reaches the VM and OK says "all fields required". -->
                 <AutoCompleteBox x:Name="ProjectBox" Text="{Binding ProjectName, Mode=OneWay}"
                                  ItemsSource="{Binding Projects}"
-                                 MaxDropDownHeight="200" FontSize="12" />
+                                 MaxDropDownHeight="200" FontSize="12" TextChanged="OnProjectBoxTextChanged" />
             </StackPanel>
             <StackPanel Spacing="4">
                 <TextBlock Text="Building Name:" FontSize="12" />
                 <TextBox Text="{Binding BuildingName}" FontSize="12" />
+            </StackPanel>
+            <StackPanel Spacing="4">
+                <TextBlock Text="Standard:" FontSize="12" />
+                <ComboBox ItemsSource="{Binding StandardEditions}" SelectedItem="{Binding SelectedStandardEdition}" Width="308" FontSize="12" ToolTip.Tip="SANS 10400-XA edition: 2026 = per-storey table 4 assessment · 2011 = legacy report" />
+            </StackPanel>
+            <StackPanel Spacing="4" IsVisible="{Binding IsStandard2026}">
+                <TextBlock Text="Site Town (2026):" FontSize="12" />
+                <AutoCompleteBox Text="{Binding TownName, Mode=OneWay}" ItemsSource="{Binding TownNames}" MinimumPrefixLength="0"
+                                 MaxDropDownHeight="200" FontSize="12" TextChanged="OnTownBoxTextChanged"
+                                 ToolTip.Tip="Annex C town — sets energy zone, latitude and SCCP; any other name is kept (finish the latitude in the left panel)" />
             </StackPanel>
             <!-- Climate + Orientation: label-above rows like Building Name, so both
                  combos share the TextBoxes' left/right edges (explicit width: ComboBox
                  does not stretch) -->
             <StackPanel Spacing="4">
                 <TextBlock Text="Climate Zone:" FontSize="12" />
-                <ComboBox ItemsSource="{Binding ClimateZones}" SelectedItem="{Binding SelectedClimateZone}" Width="308" FontSize="12" />
+                <ComboBox ItemsSource="{Binding ClimateZones}" SelectedItem="{Binding SelectedClimateZone}" Width="308" FontSize="12" ToolTip.Tip="2011: climatic zones 1–6 · 2026: energy zones 1–7 + 5H (filled from the town when picked)" />
             </StackPanel>
             <StackPanel Spacing="4">
                 <TextBlock Text="Orientation:" FontSize="12" />

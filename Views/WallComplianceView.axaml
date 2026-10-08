@@ -1,0 +1,232 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FenCalc2.ViewModels"
+             xmlns:models="using:FenCalc2.Models"
+             xmlns:views="using:FenCalc2.Views"
+             x:Class="FenCalc2.Views.WallComplianceView"
+             x:DataType="vm:WallComplianceViewModel">
+
+    <DockPanel Margin="14">
+
+        <!-- Bottom: status (the page is a tab — there is no Done; edits write through) -->
+        <TextBlock DockPanel.Dock="Bottom" Text="{Binding StatusMessage}" FontSize="11"
+                   Foreground="{DynamicResource TextSecondaryBrush}"
+                   TextTrimming="CharacterEllipsis" Margin="0,10,0,0" />
+
+        <!-- Top: wall selector + assembly meta -->
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="0,0,0,10">
+            <TextBlock Text="Wall:" FontSize="12" VerticalAlignment="Center" />
+            <ComboBox ItemsSource="{Binding Walls}" SelectedItem="{Binding SelectedWallRow}" Width="150" FontSize="12"
+                      IsEnabled="{Binding HasSelectedWall}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:WallRow">
+                        <TextBlock Text="{Binding Name}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <Button Content="New Wall" Command="{Binding NewWallCommand}" FontSize="12" Padding="8,4" />
+            <Button Content="Delete" Classes="quiet" Command="{Binding DeleteWallCommand}" FontSize="12" Padding="8,4"
+                    ToolTip.Tip="Delete the selected wall and all its layers" />
+            <Border Width="1" Background="{DynamicResource HairlineBrush}" Margin="4,0" />
+            <TextBlock Text="Name:" FontSize="12" VerticalAlignment="Center" />
+            <TextBox Text="{Binding SelectedWallRow.Name}" Width="140" FontSize="12" IsEnabled="{Binding HasSelectedWall}" />
+            <CheckBox Content="Category 1 (≤ 80 m², no basement)" IsChecked="{Binding SelectedWallRow.Category1}"
+                      IsEnabled="{Binding HasSelectedWall}" FontSize="12"
+                      ToolTip.Tip="Cl. 3.2 declaration: class A3/A4/F2/G1/H2/H3/H4 occupancy, no basement, ≤ 6,0 m support spacing, floor area ≤ 80 m²" />
+            <TextBlock Text="Attachments:" FontSize="12" VerticalAlignment="Center" Margin="6,0,0,0" />
+            <ComboBox ItemsSource="{Binding AttachmentModes}" SelectedItem="{Binding SelectedWallRow.AttachmentMode}"
+                      Width="100" FontSize="12" IsEnabled="{Binding HasSelectedWall}"
+                      ToolTip.Tip="Cl. 5.5.5: garages/verandahs/etc. included in or excluded from the envelope" />
+            <TextBlock Text="Energy zone:" FontSize="12" VerticalAlignment="Center" Margin="6,0,0,0" />
+            <ComboBox ItemsSource="{Binding EnergyZones}" SelectedItem="{Binding EnergyZone}"
+                      Width="95" FontSize="12"
+                      ToolTip.Tip="Site energy zone for tables 6/7 (annex C) — independent of the building's edition; set once per building" />
+        </StackPanel>
+
+        <!-- Left column510 keeps the625-wide report box (plus its scrollbar) inside
+             the right column even at the default1200 px window width. -->
+        <Grid ColumnDefinitions="510,14,*">
+
+            <!-- ================= Left: colour-coded cross-section ================= -->
+            <DockPanel Grid.Column="0">
+                <TextBlock DockPanel.Dock="Top" Text="Cross-section (outside → inside)" FontWeight="SemiBold"
+                           FontSize="13" Margin="0,0,0,6" />
+
+                <!-- Layer editor -->
+                <StackPanel DockPanel.Dock="Bottom" Spacing="8" Margin="0,10,0,0"
+                            IsEnabled="{Binding HasSelectedLayer}">
+                    <TextBlock Text="Selected layer" FontWeight="SemiBold" FontSize="13" />
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Material:" FontSize="12" />
+                        <ComboBox ItemsSource="{Binding Materials}" SelectedItem="{Binding SelectedMaterial}" Width="340" FontSize="12">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="models:WallMaterial">
+                                    <TextBlock Text="{Binding Name}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+                    <!-- Two rows: thickness + preset chips, then the λ/ρ/c overrides —
+                         a single row overflowed the column and overlapped the report. -->
+                    <StackPanel Spacing="6">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Thickness (mm):" FontSize="12" />
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <TextBox Text="{Binding SelectedLayer.ThicknessText}" Width="76" FontSize="12"
+                                         IsEnabled="{Binding SelectedLayer.IsFilm, Converter={x:Static views:WallConverters.InverseBool}}"
+                                         ToolTip.Tip="Air films have a fixed R — thickness is physical only" />
+                                <ItemsControl ItemsSource="{Binding SelectedPresets}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="x:String">
+                                            <Button Content="{Binding}" Click="OnPresetClick" FontSize="11" Padding="6,3" Margin="0,0,4,0"
+                                                    ToolTip.Tip="Standard production thickness (XA table 10 note 3) — any value stays typeable" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </StackPanel>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="λ override (W/mK):" FontSize="12" />
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBox Text="{Binding SelectedLayer.LambdaText}" Width="70" FontSize="12" />
+                                <TextBlock Text="{Binding SelectedLayer.LibraryLambdaText, StringFormat='library {0}'}" FontSize="11"
+                                           Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="ρ override (kg/m³):" FontSize="12" />
+                            <TextBox Text="{Binding SelectedLayer.DensityText}" Width="70" FontSize="12" />
+                        </StackPanel>
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="c override (J/kgK):" FontSize="12" />
+                            <TextBox Text="{Binding SelectedLayer.CText}" Width="70" FontSize="12" />
+                        </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <Button Content="Add layer" Command="{Binding AddLayerCommand}" FontSize="12" Padding="8,4" />
+                        <Button Content="Remove" Classes="quiet" Command="{Binding RemoveLayerCommand}" FontSize="12" Padding="8,4" />
+                        <Button Content="▲" Command="{Binding MoveUpCommand}" FontSize="11" Padding="8,4" ToolTip.Tip="Move the selected layer towards the outside" />
+                        <Button Content="▼" Command="{Binding MoveDownCommand}" FontSize="11" Padding="8,4" ToolTip.Tip="Move the selected layer towards the inside" />
+                    </StackPanel>
+                    <TextBlock Text="λ/ρ/c overrides are per-layer manufacturer values — blank means use the library." FontSize="10"
+                               Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" />
+                </StackPanel>
+
+                <!-- The stack itself -->
+                <ListBox x:Name="LayersList" ItemsSource="{Binding Layers}" SelectedItem="{Binding SelectedLayer}"
+                         Background="Transparent" BorderThickness="0" FontSize="12">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="vm:WallLayerRow">
+                            <Border Background="{DynamicResource PanelBrush}" BorderBrush="{DynamicResource HairlineBrush}"
+                                    BorderThickness="1" CornerRadius="6" Padding="8,5" Margin="0,0,0,4" MinHeight="40">
+                                <Grid ColumnDefinitions="18,Auto,10,*,Auto,Auto,Auto,Auto">
+                                    <TextBlock Grid.Column="0" Text="⠿" FontSize="14" VerticalAlignment="Center"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                               ToolTip.Tip="Drag to reorder"
+                                               PointerPressed="OnHandlePointerPressed"
+                                               PointerMoved="OnHandlePointerMoved"
+                                               PointerReleased="OnHandlePointerReleased" />
+                                    <Border Grid.Column="1" Width="{Binding BarWidth}" Height="20" CornerRadius="2"
+                                            VerticalAlignment="Center" BorderThickness="1"
+                                            BorderBrush="{DynamicResource HairlineBrush}"
+                                            Background="{Binding Category, Converter={x:Static views:WallConverters.CategoryBrush}}" />
+                                    <StackPanel Grid.Column="3" VerticalAlignment="Center" Margin="2,0">
+                                        <TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding MaterialName}" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="4" Text="{Binding ThicknessDisplay}" FontSize="12"
+                                               VerticalAlignment="Center" MinWidth="54" TextAlignment="Right" />
+                                    <TextBlock Grid.Column="5" Text="{Binding RDisplay}" FontSize="12"
+                                               VerticalAlignment="Center" MinWidth="48" TextAlignment="Right" Margin="0,0,6,0"
+                                               ToolTip.Tip="Layer resistance R (m²K/W)" />
+                                    <Button Grid.Column="6" Content="▲" Click="OnRowMoveUpClick" FontSize="10" Padding="5,2" Margin="0,0,4,0" />
+                                    <Button Grid.Column="7" Content="▼" Click="OnRowMoveDownClick" FontSize="10" Padding="5,2" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+
+            <!-- ================= Right: totals, checks, report ================= -->
+            <ScrollViewer Grid.Column="2">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Totals" FontWeight="SemiBold" FontSize="13" />
+                    <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
+                        <TextBlock Grid.Row="0" Text="Classification:" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ClassificationText}" FontSize="12" FontWeight="SemiBold" />
+                        <TextBlock Grid.Row="1" Text="Total R (m²K/W):" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding TotalRText}" FontSize="12" FontWeight="SemiBold" />
+                        <TextBlock Grid.Row="2" Text="C-value (J/m²K):" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding CValueText}" FontSize="12" FontWeight="SemiBold" />
+                        <TextBlock Grid.Row="3" Text="CR value (h):" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding CRText}" FontSize="12" FontWeight="SemiBold" />
+                        <TextBlock Grid.Row="4" Text="Surface density:" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding DensityText, StringFormat='{}{0} kg/m²'}" FontSize="12" FontWeight="SemiBold" />
+                        <TextBlock Grid.Row="5" Text="Required:" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding RequiredText}" FontSize="12" FontWeight="SemiBold" TextWrapping="Wrap" />
+                    </Grid>
+
+                    <Border Background="{DynamicResource SunkenBrush}" CornerRadius="6" Padding="12,8">
+                        <TextBlock Text="{Binding ResultText}" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center"
+                                   Foreground="{Binding ResultText, Converter={x:Static views:WallConverters.VerdictBrush}}" />
+                    </Border>
+
+                    <TextBlock Text="Checks" FontWeight="SemiBold" FontSize="13" />
+                    <ItemsControl ItemsSource="{Binding Checks}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:WallCheckRow">
+                                <Border Background="{DynamicResource PanelBrush}" BorderBrush="{DynamicResource HairlineBrush}"
+                                        BorderThickness="1" CornerRadius="4" Padding="8,5" Margin="0,0,0,4">
+                                    <Grid ColumnDefinitions="170,58,*">
+                                        <TextBlock Grid.Column="0" Text="{Binding Name}" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Text="{Binding Verdict}" FontSize="11" FontWeight="Bold" VerticalAlignment="Center"
+                                                   Foreground="{Binding Verdict, Converter={x:Static views:WallConverters.VerdictBrush}}" />
+                                        <TextBlock Grid.Column="2" Text="{Binding Detail}" FontSize="11" TextWrapping="Wrap" VerticalAlignment="Center" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <StackPanel Spacing="4" IsVisible="{Binding HasWarnings}">
+                        <TextBlock Text="Warnings" FontWeight="SemiBold" FontSize="13"
+                                   Foreground="{DynamicResource WarningBrush}" />
+                        <ItemsControl ItemsSource="{Binding Warnings}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <TextBlock Text="{Binding, StringFormat='⚠ {0}'}" FontSize="11" TextWrapping="Wrap"
+                                               Foreground="{DynamicResource WarningBrush}" Margin="0,0,0,3" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+
+                    <CheckBox Content="Capitalize report" IsChecked="{Binding CapitalizeOutput}" FontSize="12" />
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="6">
+                        <TextBlock Text="Report" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" Margin="0,0,60,0" />
+                        <Button Content="Copy" Click="OnCopyClick" FontSize="12" Padding="10,4"
+                                ToolTip.Tip="Copy this wall's report to the clipboard" />
+                    </StackPanel>
+                    <!-- Thinner + right-anchored: the report content is not that wide,
+                         and it keeps the box clear of the layer editor (user report). -->
+                    <TextBox Text="{Binding OutputText}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="NoWrap"
+                             FontFamily="Consolas" FontSize="11" Height="250" Width="625"
+                             HorizontalAlignment="Right"
+                             ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto" />
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </DockPanel>
+</UserControl>

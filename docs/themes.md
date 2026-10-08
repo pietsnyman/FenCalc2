@@ -97,6 +97,19 @@ Surfaces `#1A2230` / `#151C28` / `#10161F`, hairline `#2A3546`, text `#E5EAF2` /
 semantic `#E5614F` / `#3A1F1C` / `#3FB27F` / `#D99A4E`, tiles `#1D2939` /
 North `#2F4F7E`.
 
+## Wall layer colours (Envelope window)
+
+Defined **once** in the outer `Application.Resources` of App.axaml (outside the theme
+dictionaries): `LayerFilmBrush` `#BFD0DE`, `LayerCavityBrush` `#F2F3F5`,
+`LayerPlasterBrush` `#EBDCB2`, `LayerMasonryBrush` `#C67B5C`,
+`LayerInsulationBrush` `#E5A8B8`, `LayerMetalBrush` `#9AA4AE`, `LayerOtherBrush`
+`#C9BFAD`. Mid-tones chosen to read on light AND dark panels, so new themes need no
+layer keys. Resolved through `WallConverters.CategoryBrush` at convert time — safe
+because these tokens are theme-independent. The verdict brushes (semantic tokens)
+are re-raised after a theme switch by `WallComplianceViewModel.RefreshThemedBrushes`
+via `MainViewModel.RefreshThemedBrushes` — required now that the walls page is a TAB
+and the View > Theme menu stays reachable while it is displayed.
+
 ## Adding a theme (checklist)
 
 1. Add a static `ThemeVariant` in `AppThemes.cs` + a `FromName` case + a const name.

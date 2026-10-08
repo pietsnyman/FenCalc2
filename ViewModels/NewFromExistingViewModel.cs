@@ -151,7 +151,12 @@ public partial class NewFromExistingViewModel : ViewModelBase
             ClientName = destClient,
             ProjectName = destProject,
             ClimateZone = src.ClimateZone,
-            Orientation = src.Orientation
+            Orientation = src.Orientation,
+            // Same assessment basis as the source: edition + site (2026 report inputs)
+            StandardEdition = src.StandardEdition,
+            Town = src.Town,
+            Latitude = src.Latitude,
+            Sccp = src.Sccp
         };
         clone.Id = _projectRepo.Insert(clone);
         _projectRepo.UpdateCompassState(clone.Id, src.RotationOffset, src.IsMirrored);

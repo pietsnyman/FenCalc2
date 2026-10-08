@@ -18,6 +18,8 @@
     <AvaloniaResource Include="Assets\**" />
     <!-- Curated catalogue seed (tools/export_seed.py) — see Data/CatalogueSeeder.cs. -->
     <EmbeddedResource Include="Data\seed\catalogue.sql" />
+    <!-- SANS 10400-XA:2026 reference data (tools/import_sans2026.py) — see Data/Xa2026Seeder.cs. -->
+    <EmbeddedResource Include="Data\seed\xa2026.sql" />
   </ItemGroup>
 
   <ItemGroup>

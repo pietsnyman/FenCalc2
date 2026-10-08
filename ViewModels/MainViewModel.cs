@@ -21,6 +21,7 @@ public partial class MainViewModel : ViewModelBase
     private readonly FloorRepository _floorRepo;
     private readonly WindowPlacementRepository _windowRepo;
     private readonly CatalogueRepository _catalogueRepo;
+    private readonly WallRepository _wallRepo;
     private readonly SolarCalculator _solarCalc;
     private readonly OutputFormatter _outputFormatter;
 
@@ -29,6 +30,10 @@ public partial class MainViewModel : ViewModelBase
     private Floor? _currentFloor;
     private List<WindowPlacement> _allWindows = new();
     private List<Floor> _allFloors = new();
+    // XA:2026 reference tables (seeded by Xa2026Seeder before the UI exists) — lazily
+    // loaded once per session; only 2026-edition projects ever query them.
+    private List<FenestrationBand>? _bands2026;
+    private List<ShadingMultiplier>? _multipliers2026;
     private int _rotationOffset;
     private bool _syncingTopDirection; // SelectedOrientation display-sync, not a user pick
 
@@ -47,6 +52,7 @@ public partial class MainViewModel : ViewModelBase
         _floorRepo = new FloorRepository(Database.CreateConnection);
         _windowRepo = new WindowPlacementRepository(Database.CreateConnection);
         _catalogueRepo = new CatalogueRepository(Database.CreateConnection);
+        _wallRepo = new WallRepository(Database.CreateConnection);
         _solarCalc = new SolarCalculator(_catalogueRepo);
         _outputFormatter = new OutputFormatter(_solarCalc);
 
@@ -57,6 +63,17 @@ public partial class MainViewModel : ViewModelBase
         _useThreeDecimals = _projectRepo.GetSetting("UseThreeDecimals") == "true";
         _capitalizeOutput = _projectRepo.GetSetting("CapitalizeOutput") == "true";
         _combineFloors = _projectRepo.GetSetting("CombineFloors") == "true";
+
+        // Restore the last main tab (field assign → no change-event at startup);
+        // sanitized by OnSelectedMainTabChanged / OnHasProjectChanged when needed.
+        if (int.TryParse(_projectRepo.GetSetting("MainTab"), out var mainTab) && mainTab is 0 or 1)
+            _selectedMainTab = mainTab;
+
+        // Zone combo starts on the legacy list; LoadProject refills it per edition.
+        RefreshClimateZoneList("2011");
+
+        // Annex C town names for the site autocomplete (one read, ~400 rows).
+        foreach (var t in _catalogueRepo.GetTowns()) TownNames.Add(t.Town);
     }
 
     // Orientation constants
@@ -83,6 +100,21 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private string _projectName = string.Empty;
     [ObservableProperty] private string _buildingName = string.Empty;
     [ObservableProperty] private string _selectedClimateZone = "Zone 1";
+    // Which SANS 10400-XA edition this building is assessed against ("2011" | "2026");
+    // the left-panel combo edits it, RecalculateOutput dispatches on the project value.
+    [ObservableProperty] private string _selectedStandardEdition = "2011";
+    // Visibility driver for the 2026-only site fields (left panel + editor shading row)
+    [ObservableProperty] private bool _isStandard2026;
+    // Main tab host: 0 = Fenestration, 1 = External Walls (persisted as AppSettings
+    // "MainTab"). The walls tab is available on EVERY edition — walls carry their own
+    // energy zone (Projects.WallEnergyZone), so they never depend on StandardEdition.
+    [ObservableProperty] private int _selectedMainTab;
+    [ObservableProperty] private WallComplianceViewModel? _wallsVm;
+    // Left-panel site (XA:2026): town from annex C, latitude (drives table 3 M), SCCP flag
+    [ObservableProperty] private string _townName = string.Empty;
+    [ObservableProperty] private string _siteLatitude = string.Empty;
+    [ObservableProperty] private bool _siteSccp;
+    private bool _loadingSite; // LoadProject pushes stored values — no lookups, no DB writes
     [ObservableProperty] private string _selectedOrientation = "North";
     [ObservableProperty] private string _selectedFloorName = "Ground Floor";
     [ObservableProperty] private string _floorArea = string.Empty;
@@ -125,6 +157,8 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private string _selHeight = string.Empty;
     [ObservableProperty] private string _selP = string.Empty;
     [ObservableProperty] private string _selG = string.Empty;
+    // XA:2026 shading classification of the selected window (editor row, 2026 projects)
+    [ObservableProperty] private string _selShading = "Auto";
     [ObservableProperty] private string _selArea = string.Empty;
     [ObservableProperty] private bool _hasSelectedWindow;
     [ObservableProperty] private string _selRange = string.Empty;
@@ -139,7 +173,16 @@ public partial class MainViewModel : ViewModelBase
 
     // Combo sources
     public string[] Orientations { get; } = OrientationNames;
-    public string[] ClimateZones { get; } = { "Zone 1", "Zone 2", "Zone 3", "Zone 4", "Zone 5", "Zone 6" };
+    // Zone list is EDITION-dependent and rebuilt by RefreshClimateZoneList: 2011 = the
+    // six legacy climatic zones, 2026 = the annex C energy zones (1-7 + 5H, seeded by
+    // Xa2026Seeder). ObservableCollection so refills notify the ComboBox; the NAME stays
+    // "ClimateZones" because MainWindow.axaml binds it.
+    public ObservableCollection<string> ClimateZones { get; } = new();
+    public static string[] LegacyClimateZones { get; } =
+        { "Zone 1", "Zone 2", "Zone 3", "Zone 4", "Zone 5", "Zone 6" };
+    public string[] StandardEditions { get; } = { "2011", "2026" };
+    public string[] SelShadingOptions { get; } = { "Auto", "Shaded", "Unshaded" };
+    public ObservableCollection<string> TownNames { get; } = new();
     // Default floor-name sequence; beyond Sixth Floor new floors become "Floor 7", "Floor 8"…
     public static string[] DefaultFloorNames { get; } = { "Ground Floor", "First Floor", "Second Floor", "Third Floor", "Fourth Floor", "Fifth Floor", "Sixth Floor" };
 
@@ -277,6 +320,7 @@ public partial class MainViewModel : ViewModelBase
                 SelHeight = string.Empty;
                 SelP = string.Empty;
                 SelG = string.Empty;
+                SelShading = "Auto";
                 SelArea = string.Empty;
                 SelWinTypeNames.Clear();
                 ClearEditorStatus();
@@ -313,6 +357,7 @@ public partial class MainViewModel : ViewModelBase
             SelHeight = wp.WinHeight.ToString("F3");
             SelP = wp.P.ToString();
             SelG = wp.G.ToString();
+            SelShading = wp.ShadingOverride switch { 1 => "Shaded", 0 => "Unshaded", _ => "Auto" };
             SelArea = (wp.WinWidth * wp.WinHeight).ToString("F3");
         }
         finally
@@ -444,6 +489,10 @@ public partial class MainViewModel : ViewModelBase
                 _editorStatusIsWarning ? "WarningBrush" : "SuccessBrush",
                 _editorStatusIsWarning ? "#B45309" : "#15803D");
         }
+
+        // The walls page is a tab (not a modal), so its converter-resolved verdict
+        // brushes also need a re-raise when the theme changes.
+        WallsVm?.RefreshThemedBrushes();
     }
 
     // Hand-edited W/H vs the DB row: warn only while the user's manual edit is
@@ -635,6 +684,20 @@ public partial class MainViewModel : ViewModelBase
         return best ?? "Aluminium Top Hung";
     }
 
+    // Add Window P/G pre-population: the building's most frequent (P, G) PAIR among its
+    // windows — ties go to the newest window (highest Id). Null = the building has no
+    // windows yet, so the dialog keeps its 375/160 defaults. Both Add and Apply Changes
+    // feed this automatically: they are what writes those rows.
+    public static (int p, int g)? MostCommonPG(IEnumerable<WindowPlacement> windows)
+    {
+        var best = windows
+            .GroupBy(w => (w.P, w.G))
+            .OrderByDescending(g => g.Count())
+            .ThenByDescending(g => g.Max(w => w.Id))
+            .FirstOrDefault();
+        return best is null ? null : (best.Key.P, best.Key.G);
+    }
+
     [RelayCommand]
     private void AddWindow(string orientation)
     {
@@ -642,6 +705,13 @@ public partial class MainViewModel : ViewModelBase
 
         var vm = new AddWindowViewModel(_catalogueRepo, orientation,
             StoreyOrderedFloorNames(), _currentFloor?.FloorName, DefaultRangeForDialog());
+        // Pre-fill P/G with the building's most-used pair (newest wins a tie).
+        var pg = MostCommonPG(_allWindows);
+        if (pg is not null)
+        {
+            vm.P = pg.Value.p.ToString();
+            vm.G = pg.Value.g.ToString();
+        }
         var dialog = new Views.AddWindowView
         {
             DataContext = vm
@@ -761,6 +831,8 @@ public partial class MainViewModel : ViewModelBase
         wp.G = (int)Math.Round(g.Value);
         wp.UValue = u.Value;
         wp.SHGC = shgc.Value;
+        // XA:2026 shading classification (5.2.2): null = automatic P ≥ H × M test.
+        wp.ShadingOverride = SelShading switch { "Shaded" => 1, "Unshaded" => 0, _ => null };
 
         // Staged floor: resolve BEFORE the write (Update persists FloorId too), then
         // move the view to the destination so the moved window stays visible.
@@ -874,6 +946,23 @@ public partial class MainViewModel : ViewModelBase
             return;
         }
 
+        if (_currentProject.StandardEdition == "2026")
+        {
+            _bands2026 ??= _catalogueRepo.GetFenestrationBands().ToList();
+            _multipliers2026 ??= _catalogueRepo.GetShadingMultipliers().ToList();
+            // Per storey ALWAYS: cl. 5.3.5 Note 2 forbids trading storeys off, so the
+            // Combine-floors toggle intentionally does not reach this formatter.
+            OutputText = Fenestration2026.Format(
+                _currentProject,
+                _allFloors,
+                _allWindows,
+                _bands2026,
+                _multipliers2026,
+                UseThreeDecimals,
+                CapitalizeOutput);
+            return;
+        }
+
         OutputText = _outputFormatter.Format(
             _currentProject,
             _allFloors,
@@ -921,10 +1010,83 @@ public partial class MainViewModel : ViewModelBase
 
     partial void OnSelectedClimateZoneChanged(string value)
     {
-        if (_currentProject is null) return;
+        // null/empty = the ComboBox pushed SelectedItem mid-refill (same trap as the
+        // floor combo, see OnSelectedFloorNameChanged) — keep the current zone; never
+        // persist null into a NOT NULL column.
+        if (_currentProject is null || string.IsNullOrEmpty(value)) return;
         _currentProject.ClimateZone = value;
         _projectRepo.Update(_currentProject);
         RecalculateOutput();
+    }
+
+    // Left-panel standard selector. Zone MEANING differs between the schemes (e.g.
+    // Pretoria = Zone 2 on the 2011 climatic map, Zone 5 on the 2026 energy map), so
+    // switching refills the zone list and only keeps a zone that exists there.
+    partial void OnSelectedStandardEditionChanged(string value)
+    {
+        if (_currentProject is null) return;
+        IsStandard2026 = value == "2026";
+        _currentProject.StandardEdition = value;
+        _projectRepo.Update(_currentProject);
+        _projectRepo.Update(_currentProject);
+        RefreshClimateZoneList(value);
+        RecalculateOutput();
+        ImportResultMessage = value == "2026"
+            ? "Standard: SANS 10400-XA:2026 — re-check the energy zone and set the site latitude."
+            : "Standard: SANS 10400-XA:2011 (legacy report).";
+    }
+
+    // ---- Left-panel site fields (XA:2026) ------------------------------------------
+    // Selecting/typing a town that exists in annex C fills zone + latitude + SCCP.
+    // The standard's list is NOT exhaustive (Sutherland, Kroonstad, Benoni … are simply
+    // absent), so any other name is kept as free text — never an error.
+    partial void OnTownNameChanged(string value)
+    {
+        if (_loadingSite || _currentProject is null) return;
+        _currentProject.Town = value;
+        var match = string.IsNullOrWhiteSpace(value) ? null : _catalogueRepo.GetTown(value.Trim());
+        if (match is not null)
+        {
+            var zone = "Zone " + match.EnergyZone;
+            if (ClimateZones.Contains(zone)) SelectedClimateZone = zone; // persists via its handler
+            SiteLatitude = match.Latitude.ToString("0.000");             // persists via its handler
+            SiteSccp = match.Sccp != 0;
+        }
+        _projectRepo.Update(_currentProject); // Town itself (zone/lat/sccp go through their handlers)
+        RecalculateOutput();
+    }
+
+    partial void OnSiteLatitudeChanged(string value)
+    {
+        if (_loadingSite || _currentProject is null) return;
+        _currentProject.Latitude = Helpers.ParseTolerant(value); // null = cleared = no shading credit
+        _projectRepo.Update(_currentProject);
+        RecalculateOutput();
+    }
+
+    partial void OnSiteSccpChanged(bool value)
+    {
+        if (_loadingSite || _currentProject is null) return;
+        _currentProject.Sccp = value;
+        _projectRepo.Update(_currentProject);
+        RecalculateOutput();
+    }
+
+    // Rebuild the zone combo for the edition. The current selection survives when it
+    // still exists in the new list; otherwise the first zone is selected — and because
+    // Clear() can push null through the binding first, the value is always reassigned.
+    private void RefreshClimateZoneList(string edition)
+    {
+        var zones = (edition == "2026"
+                ? _catalogueRepo.GetEnergyZoneList().Select(z => "Zone " + z)
+                : LegacyClimateZones)
+            .ToList();
+        if (zones.Count == 0) zones = LegacyClimateZones.ToList(); // seeder-failure guard
+
+        var keep = SelectedClimateZone;
+        ClimateZones.Clear();
+        foreach (var z in zones) ClimateZones.Add(z);
+        SelectedClimateZone = zones.Contains(keep) ? keep : zones[0];
     }
 
     partial void OnSelectedOrientationChanged(string value)
@@ -1074,7 +1236,21 @@ public partial class MainViewModel : ViewModelBase
         ClientName = project.ClientName;
         ProjectName = project.ProjectName;
         BuildingName = project.BuildingName;
-        SelectedClimateZone = project.ClimateZone;
+        // Refill the zone combo for the project's standard BEFORE restoring its zone:
+        // the 2011 climatic and 2026 energy zone lists are different lists entirely.
+        SelectedStandardEdition = project.StandardEdition;
+        if (ClimateZones.Contains(project.ClimateZone))
+            SelectedClimateZone = project.ClimateZone;
+        else
+            SelectedClimateZone = ClimateZones[0]; // clamps a zone from the other scheme
+
+        // Site fields (2026): guard so the town lookup never re-runs mid-load and
+        // overwrites values that were edited after the town was originally picked.
+        _loadingSite = true;
+        TownName = project.Town ?? string.Empty;
+        SiteLatitude = project.Latitude?.ToString("0.000") ?? string.Empty;
+        SiteSccp = project.Sccp;
+        _loadingSite = false;
         // SelectedOrientation is NOT set here: the rotation offset isn't restored yet,
         // and this assignment would fire the user-pick handler against the previous
         // project's top. RefreshCompass() below syncs the derived top direction.
@@ -1107,6 +1283,10 @@ public partial class MainViewModel : ViewModelBase
         _projectRepo.SetSetting("LastClient", project.ClientName);
         _projectRepo.SetSetting("LastProject", project.ProjectName);
         _projectRepo.SetSetting("LastBuilding", project.BuildingName);
+
+        // The walls page follows the open building — rebuilt every load so it never
+        // holds a stale project reference (same-edition A→B switches fire no events).
+        WallsVm = new WallComplianceViewModel(_wallRepo, _projectRepo, project);
     }
 
     // Dialog events
@@ -1133,10 +1313,30 @@ public partial class MainViewModel : ViewModelBase
     [RelayCommand]
     private void GettingStarted() => ShowGettingStartedDialog?.Invoke(new GettingStartedViewModel());
 
+    // Main tab (0 = Fenestration, 1 = External Walls): persisted per session choice;
+    // the walls tab needs its VM, so a click without a project snaps back to tab 0.
+    partial void OnSelectedMainTabChanged(int value)
+    {
+        if (value == 1 && WallsVm is null)
+        {
+            _selectedMainTab = 0;
+            OnPropertyChanged(nameof(SelectedMainTab));
+            return;
+        }
+        _projectRepo.SetSetting("MainTab", value.ToString());
+    }
+
+    partial void OnHasProjectChanged(bool value)
+    {
+        if (value) return;
+        WallsVm = null;
+        if (SelectedMainTab == 1) SelectedMainTab = 0;
+    }
+
     [RelayCommand]
     private void NewProject()
     {
-        var vm = new NewProjectViewModel(_projectRepo, _floorRepo);
+        var vm = new NewProjectViewModel(_projectRepo, _floorRepo, _catalogueRepo);
         ShowNewProjectDialog?.Invoke(vm);
     }
 

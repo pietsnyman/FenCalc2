@@ -49,8 +49,8 @@ public class WindowPlacementRepository
     {
         using var conn = _connFactory();
         return conn.ExecuteScalar<int>("""
-            INSERT INTO WindowPlacements (ProjectId, FloorId, WinType, WinWidth, WinHeight, Orientation, WinGlass, WinFrame, UValue, SHGC, P, G, RoomName)
-            VALUES (@ProjectId, @FloorId, @WinType, @WinWidth, @WinHeight, @Orientation, @WinGlass, @WinFrame, @UValue, @SHGC, @P, @G, @RoomName);
+            INSERT INTO WindowPlacements (ProjectId, FloorId, WinType, WinWidth, WinHeight, Orientation, WinGlass, WinFrame, UValue, SHGC, P, G, ShadingOverride, RoomName)
+            VALUES (@ProjectId, @FloorId, @WinType, @WinWidth, @WinHeight, @Orientation, @WinGlass, @WinFrame, @UValue, @SHGC, @P, @G, @ShadingOverride, @RoomName);
             SELECT last_insert_rowid();
             """, wp);
     }
@@ -62,7 +62,8 @@ public class WindowPlacementRepository
             UPDATE WindowPlacements
             SET FloorId = @FloorId, WinType = @WinType, WinWidth = @WinWidth, WinHeight = @WinHeight,
                 Orientation = @Orientation, WinGlass = @WinGlass, WinFrame = @WinFrame,
-                UValue = @UValue, SHGC = @SHGC, P = @P, G = @G, RoomName = @RoomName
+                UValue = @UValue, SHGC = @SHGC, P = @P, G = @G, ShadingOverride = @ShadingOverride,
+                RoomName = @RoomName
             WHERE Id = @Id
             """, wp);
     }

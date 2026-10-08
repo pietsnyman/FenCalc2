@@ -24,6 +24,9 @@ public partial class App : Application
             // Fresh install? Load the curated catalogue (glazing/frames/climate zones/
             // window ranges) so the app is usable without the legacy import.
             CatalogueSeeder.SeedIfEmpty(conn);
+            // SANS 10400-XA:2026 reference data (bands / shading multipliers / towns) —
+            // idempotent UPSERTs, intended to run on every launch (see Xa2026Seeder).
+            Xa2026Seeder.Apply(conn);
         }
 
         // Apply the persisted View > Theme choice before any window parses XAML;

@@ -134,4 +134,52 @@ public class CatalogueRepository
             VALUES (@Zone, @PH, @North, @NorthEast, @East, @SouthEast, @South, @SouthWest, @West, @NorthWest)
             """, row);
     }
+
+    // ---- SANS 10400-XA:2026 reference data (Data/seed/xa2026.sql via Xa2026Seeder) ----
+
+    /// <summary>Energy zones of XA:2026, sorted '1'..'7' with '5H' between 5 and 6.</summary>
+    public IEnumerable<string> GetEnergyZoneList()
+    {
+        using var conn = _connFactory();
+        return conn.Query<string>("""
+            SELECT DISTINCT EnergyZone FROM EnergyZoneTowns
+            ORDER BY CASE EnergyZone WHEN '5H' THEN 5.5 ELSE CAST(EnergyZone AS REAL) END
+            """);
+    }
+
+    public IEnumerable<EnergyZoneTown> GetTowns()
+    {
+        using var conn = _connFactory();
+        return conn.Query<EnergyZoneTown>("SELECT * FROM EnergyZoneTowns ORDER BY Town, Province");
+    }
+
+    /// <summary>
+    /// First annex C row with this town name. Some names occur in two provinces
+    /// (Heidelberg, Middelburg) — the first (province-ordered) wins; the report shows
+    /// which row was used. Returns null for a town the standard does not list, which is
+    /// NOT an error: the user can enter latitude/zone/SCCP manually.
+    /// </summary>
+    public EnergyZoneTown? GetTown(string town)
+    {
+        using var conn = _connFactory();
+        return conn.QueryFirstOrDefault<EnergyZoneTown>(
+            "SELECT * FROM EnergyZoneTowns WHERE Town = @Town ORDER BY Province LIMIT 1",
+            new { Town = town });
+    }
+
+    /// <summary>All table 4 bands ordered by ratio; pick with Fenestration2026.FindBand.</summary>
+    public IEnumerable<FenestrationBand> GetFenestrationBands()
+    {
+        using var conn = _connFactory();
+        return conn.Query<FenestrationBand>(
+            "SELECT * FROM FenestrationBands ORDER BY RatioMax");
+    }
+
+    /// <summary>All table 3 multipliers ordered by latitude band (999 = "&gt;32" row).</summary>
+    public IEnumerable<ShadingMultiplier> GetShadingMultipliers()
+    {
+        using var conn = _connFactory();
+        return conn.Query<ShadingMultiplier>(
+            "SELECT * FROM ShadingMultipliers ORDER BY LatitudeMax");
+    }
 }

@@ -50,6 +50,14 @@ public partial class MainWindow : Window
     // MenuItem's own toggle and re-tint bindings the theme system cannot reach.
     private void OnThemeLightClick(object? sender, RoutedEventArgs e) => SetTheme("Light");
 
+    // Left-panel Site Town: one-way binding, so push the text into the VM here (same
+    // idiom as NewProjectView's ClientBox) — otherwise the town lookup never runs.
+    private void OnSiteTownTextChanged(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is MainViewModel vm && sender is AutoCompleteBox box)
+            vm.TownName = box.Text ?? string.Empty;
+    }
+
     private void OnThemeDarkClick(object? sender, RoutedEventArgs e) => SetTheme("Dark");
 
     private void OnThemeSystemClick(object? sender, RoutedEventArgs e) => SetTheme("Default");

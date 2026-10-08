@@ -23,6 +23,10 @@ AGENTS.md
 docs/PROGRESS.md
 docs/plans/
 
+# ---- Licensed standards (SABS copyright + employer registration — never commit)
+docs/sans.txt
+docs/standards/
+
 # ---- Misc ---------------------------------------------------------------------
 *.log
 .DS_Store

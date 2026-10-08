@@ -89,6 +89,14 @@
         </Border>
 
         <!-- Main Content: Project Info | Compass | Editor + Output -->
+        <!-- Two tabs. Adding a future page (roof assembly, …) = one more TabItem
+             hosting another Views/XxxPage UserControl + one MainViewModel VM property
+             that LoadProject rebuilds (see AGENTS.md "tab recipe"). -->
+        <TabControl SelectedIndex="{Binding SelectedMainTab, Mode=TwoWay}">
+            <TabItem Header="Fenestration">
+        <!-- NOTE: this is the FENESTRATION body grid — its columns are load-bearing
+             (220,*,450 = left panel / compass / editor+output). The walls page has its
+             OWN grid (510,14,*) — do not confuse the two when editing widths. -->
         <Grid ColumnDefinitions="220,*,450" RowDefinitions="*">
             <!-- Left Panel: Project Info -->
             <Border Grid.Column="0" Background="{DynamicResource PanelBrush}" Padding="12" BorderBrush="{DynamicResource HairlineBrush}" BorderThickness="6,6,3,6">
@@ -120,8 +128,19 @@
                         <TextBox x:Name="FloorAreaBox" Text="{Binding FloorArea}" ToolTip.Tip="Floor area in m² — drives the floor-area ratio and constants" FontSize="12" />
                     </StackPanel>
                     <StackPanel Spacing="4">
+                        <TextBlock Text="Standard:" FontSize="12" />
+                        <ComboBox ItemsSource="{Binding StandardEditions}" SelectedItem="{Binding SelectedStandardEdition}" ToolTip.Tip="SANS 10400-XA edition: 2011 = legacy report · 2026 = per-storey table 4 assessment" FontSize="12" Width="187" />
+                    </StackPanel>
+                    <StackPanel Spacing="4">
                         <TextBlock Text="Climate Zone:" FontSize="12" />
-                        <ComboBox ItemsSource="{Binding ClimateZones}" SelectedItem="{Binding SelectedClimateZone}" ToolTip.Tip="SANS 10400-XA zone (1–6): sets the solar calculation constants" FontSize="12" Width="187" />
+                        <ComboBox ItemsSource="{Binding ClimateZones}" SelectedItem="{Binding SelectedClimateZone}" ToolTip.Tip="SANS 10400-XA zone (2011: climatic 1–6 · 2026: energy 1–7 + 5H)" FontSize="12" Width="187" />
+                    </StackPanel>
+                    <StackPanel Spacing="4" IsVisible="{Binding IsStandard2026}">
+                        <TextBlock Text="Site (2026):" FontSize="12" />
+                        <AutoCompleteBox Text="{Binding TownName, Mode=OneWay}" ItemsSource="{Binding TownNames}" MinimumPrefixLength="0" MaxDropDownHeight="240" FontSize="12" TextChanged="OnSiteTownTextChanged" ToolTip.Tip="Town from annex C — fills zone, latitude and SCCP; a name the standard does not list is kept as free text (enter latitude by hand)" />
+                        <TextBlock Text="Latitude (°S):" FontSize="12" Margin="0,4,0,0" />
+                        <TextBox Text="{Binding SiteLatitude}" FontSize="12" ToolTip.Tip="Site latitude in degrees South — sets the table 3 shading multiplier M" />
+                        <CheckBox IsChecked="{Binding SiteSccp}" Content="Southern Cape condensation area (5.3.7)" FontSize="11" Margin="0,4,0,0" ToolTip.Tip="Adds the 5.3.7 single low-E note to the report" />
                     </StackPanel>
                     <StackPanel Spacing="4">
                         <TextBlock Text="Orientation:" FontSize="12" />
@@ -333,7 +352,7 @@
                             <TextBlock Grid.Row="5" Grid.Column="0" Text="Frame:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,0" />
                             <ComboBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="3" ItemsSource="{Binding SelFrameNames}" SelectedItem="{Binding SelFrame}" ToolTip.Tip="Frame material — U-value and SHGC recompute when changed" FontSize="12" Width="194" />
                         </Grid>
-                        <Grid ColumnDefinitions="60,78,46,70" RowDefinitions="Auto,Auto,Auto,Auto">
+                        <Grid ColumnDefinitions="60,78,46,70" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
                             <TextBlock Grid.Row="0" Grid.Column="0" Text="W:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,6" />
                             <TextBox Grid.Row="0" Grid.Column="1" x:Name="SelWidthBox" Text="{Binding SelWidth}" ToolTip.Tip="Editing this creates a Custom-range type on Apply (original entry unchanged)" FontSize="12" Margin="0,0,8,6" />
                             <TextBlock Grid.Row="0" Grid.Column="2" Text="H:" VerticalAlignment="Center" FontSize="12" Margin="0,0,6,6" />
@@ -351,6 +370,9 @@
 
                             <TextBlock Grid.Row="3" Grid.Column="0" Text="Area:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,0" />
                             <TextBlock Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding SelArea}" ToolTip.Tip="Width × height of the staged window (updates when you leave W or H)" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" />
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Shading:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,0" IsVisible="{Binding IsStandard2026}" />
+                            <ComboBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" ItemsSource="{Binding SelShadingOptions}" SelectedItem="{Binding SelShading}" Width="194" FontSize="12" IsVisible="{Binding IsStandard2026}" ToolTip.Tip="5.2.2: Auto = P ≥ H × M at the site latitude; force Shaded/Unshaded for shutters/blinds that satisfy 5.2.1 b)" />
                         </Grid>
                         <!-- Editor status line: W/H mismatch warnings, custom-type save notes -->
                         <TextBlock Text="{Binding EditorStatus}" FontSize="11" Foreground="{Binding EditorStatusForeground}" TextWrapping="Wrap" />
@@ -381,5 +403,12 @@
                 </Border>
             </Grid>
         </Grid>
+            </TabItem>
+            <TabItem Header="External Walls">
+                <!-- Page DataContext = the per-building walls VM; null while no project
+                     is open (MainViewModel snaps tab selection back to 0 then). -->
+                <views:WallComplianceView DataContext="{Binding WallsVm}" />
+            </TabItem>
+        </TabControl>
     </DockPanel>
 </Window>

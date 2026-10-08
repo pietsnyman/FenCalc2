@@ -79,9 +79,10 @@
                 <TextBlock Classes="h2" Text="3. Create a new project" />
                 <TextBlock Classes="step" Text="1.  Project &#8250; New Project." />
                 <TextBlock Classes="step" Text="2.  Fill in Client Name, Project Name and Building Name (the client box suggests names you have used before)." />
-                <TextBlock Classes="step" Text="3.  Choose the Climate Zone — the SANS 10400-XA zone 1 to 6 for the site. It sets the solar constants used throughout the calculation." />
-                <TextBlock Classes="step" Text="4.  Choose the Orientation: the true compass direction shown at the top of your plan. You can change it at any time." />
-                <TextBlock Classes="step" Text="5.  OK creates the building with a Ground Floor ready to use. Project &#8250; Open Project re-opens an existing building; New From Existing copies one under new names." />
+                <TextBlock Classes="step" Text="3.  Choose the Standard: 2026 (SANS 10400-XA:2026, the current per-storey assessment) or 2011 (the legacy report). New buildings start at 2026; existing buildings keep the edition they were created with." />
+                <TextBlock Classes="step" Text="4.  Choose the Climate Zone. For a 2026 building, pick the Site Town first: a town from the standard's annex C fills the energy zone (1 to 7 and 5H), the site latitude and the Southern Cape condensation flag. A town the list does not cover can still be typed — finish its latitude in the left panel afterwards. For 2011 it is the climatic zones 1 to 6, which set the solar constants." />
+                <TextBlock Classes="step" Text="5.  Choose the Orientation: the true compass direction shown at the top of your plan. You can change it at any time." />
+                <TextBlock Classes="step" Text="6.  OK creates the building with a Ground Floor ready to use. Project &#8250; Open Project re-opens an existing building; New From Existing copies one under new names." />
 
                 <!-- ===================== 4. Plan image ===================== -->
                 <TextBlock Classes="h2" Text="4. Add a floor-plan image" />
@@ -123,10 +124,21 @@
                 <TextBlock Classes="h2" Text="9. The output is the result" />
                 <TextBlock Classes="body"
                            Text="The Output panel is the useful bit: per floor it lists the fenestration area of every window type, totals, the window-to-floor-area ratio, the constants, the solar heat gain for each direction, and the conductance totals." />
+                <TextBlock Classes="body"
+                           Text="For a building on the 2026 standard the report looks different: per storey it shows the Table 4 band for the fenestration ratio, the area-weighted U-value, the weighted SHGC of every group (shaded, unshaded, southern), the per-window shading check P ≥ H × M, and a COMPLIES or DOES NOT COMPLY verdict — always storey by storey, because the standard does not let one storey make up for another." />
                 <TextBlock Classes="step" Text="•  Press Copy to Clipboard, then paste into your document." />
                 <TextBlock Classes="step" Text="•  Paste it as plain text in a monospace font — Consolas or Courier New — so the columns line up. In a proportional font the spacing will not align." />
-                <TextBlock Classes="step" Text="•  2 dec / 3 dec set the decimal places (calculations always use 3), Capitalize upper-cases the labels, and Combine floors calculates all floors as one building instead of one block per floor." />
+                <TextBlock Classes="step" Text="•  2 dec / 3 dec set the decimal places (calculations always use 3), Capitalize upper-cases the labels, and Combine floors calculates all floors as one building instead of one block per floor (2011 reports only — a 2026 report is always assessed per storey)." />
                 <TextBlock Classes="step" Text="•  Give the numbers a quick check against SANS 10400-XA before you issue them — see the note at the top." />
+
+                <TextBlock Classes="h2" Text="10. External walls (2026 buildings)" />
+                <TextBlock Classes="body"
+                           Text="The External Walls tab carries the wall rules of SANS 10400-XA:2026 (cl. 5.5) for ANY building — its energy zone is picked in the page header and is independent of the fenestration Standard, so a 2011 report and documented walls can live in the same building. Each building can hold several named walls." />
+                <TextBlock Classes="step" Text="1.  New Wall starts with a typical cavity build-up — outside air film, plaster, brick, cavity, brick, plaster, inside air film. Edit or replace any layer." />
+                <TextBlock Classes="step" Text="2.  Click a layer to edit it: choose its material, type a thickness or click a preset chip (standard production sizes), and override λ, ρ or c with manufacturer-tested values where you have them. Blank overrides mean library values." />
+                <TextBlock Classes="step" Text="3.  Reorder layers with the ⠿ drag handle or the ▲ ▼ buttons. The outside air film belongs first and the inside film last; warnings appear when a layer sits where it should not (buried films, a cavity that is not between bricks)." />
+                <TextBlock Classes="step" Text="4.  The right panel shows the classification (heavy ≥ 270 kg/m² or light), Total R, C-value, CR value and surface density, the zone requirement from tables 6 and 7, and every check: thermal, finish, metal break, category 1 and attachment boundary. Heavy walls need R ≥ the zone value; light walls pass on R or on CR, whichever you meet." />
+                <TextBlock Classes="step" Text="5.  Copy gives this wall's own report — it never mixes into the fenestration output above the compass." />
 
             </StackPanel>
         </ScrollViewer>
